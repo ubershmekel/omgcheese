@@ -1,11 +1,9 @@
--- mouse
--- cheese
--- board
--- legal moves
--- make a move
--- update board
--- turns
--- win state/event
+--[[
+A flooding game where you need to navigate the mouse to the cheese by eating
+fruit.
+]]
+
+
 
 EMPTY = '_'
 MOUSE = 'M'
@@ -29,13 +27,31 @@ function Board:new(width, height)
         height = height
         }
     setmetatable(object, Board.mt)
-    for i=1, height do
+    for i=1, width do
         object[i] = {}
-        for j=1, width do
+        for j=1, height do
             object[i][j] = EMPTY
         end
     end
     return object
+end
+
+function Board:load(text)
+    local data = {}
+    for line in text:gmatch("[^ \r\n]+") do
+        row = {}
+        for c in line:gmatch(".") do
+            table.insert(row, c)
+        end
+        table.insert(data, row)
+    end
+    local obj = Board:new(#data[1], #data)
+    for i=1, obj.width do
+        for j=1, obj.height do
+            obj[i][j] = data[j][i]
+        end
+    end
+    return obj
 end
 
 function Board.mt:__tostring()
@@ -43,7 +59,7 @@ function Board.mt:__tostring()
     for i=1, self.height do
         str = str .. ' '
         for j=1, self.width do
-            str = str .. self[i][j]
+            str = str .. self[j][i]
         end
         str = str .. '\n'
     end
@@ -56,26 +72,28 @@ function choose(array)
 end
 
 function Board:fill_random()
-    for i=1, self.height do
-        for j=1, self.width do
+    for i=1, self.width do
+        for j=1, self.height do
             self[i][j] = choose(FRUIT)
         end
     end
 end
 
 function Board:adjacent(x, y)
+    assert(x ~= nil)
+    assert(y ~= nil)
     local adj = {}
     if x < self.width then
-        table.insert(adj, self[y][x + 1])
+        adj[{x=x + 1, y=y}] = self[x + 1][y]
     end
     if y < self.height then
-        table.insert(adj, self[y + 1][x])
+        adj[{x=x, y=y + 1}] = self[x][y + 1]
     end
     if 1 < x then
-        table.insert(adj, self[y][x - 1])
+        adj[{x=x - 1, y=y}] = self[x - 1][y]
     end
     if 1 < y then
-        table.insert(adj, self[y - 1][x])
+        adj[{x=x, y=y - 1}] = self[x][y - 1]
     end
     
     return adj
@@ -83,11 +101,11 @@ end
 
 function Board:is_legal(x, y)
     local adj = self:adjacent(x, y)
-    if self[y][x] == MOUSE or self[y][x] == EMPTY then
+    if self[x][y] == MOUSE or self[x][y] == EMPTY then
         return false
     end
-    for i, v in ipairs(adj) do
-        if v == MOUSE or v == EMPTY then
+    for pos, val in pairs(adj) do
+        if val == MOUSE or val == EMPTY then
             return true
         end
     end
@@ -95,53 +113,63 @@ function Board:is_legal(x, y)
 end
 
 function Board:mouse_pos()
-    for i=1, self.height do
-        for j=1, self.width do
+    for i=1, self.width do
+        for j=1, self.height do
             if self[i][j] == MOUSE then
-                return j, i
+                return i, j
             end
         end
     end
 end
 
--- Call eat() without "what", that's only used for the recursion
-function Board:eat(x, y, what)
-    local is_first = false
-    if what == nil then
-        assert(self:is_legal(x, y))
-        what = self[y][x]
-        local mx, my = self:mouse_pos()
-        self[my][mx] = EMPTY
-        is_first = true
+function Board:eat(x, y)
+    assert(self:is_legal(x, y))
+    what = self[x][y]
+    local mx, my = self:mouse_pos()
+    self[mx][my] = EMPTY
+    for i=1, self.width do
+        for j=1, self.height do
+            if self[i][j] == EMPTY then
+                local adj = self:adjacent(i, j)
+                for pos, val in pairs(adj) do
+                    --print(table.tostring(pos), val)
+                    if val == what then
+                        self:eat_recurse(pos.x, pos.y, what)
+                    end
+                end
+            end
+        end
     end
-    
-    if self[y][x] == what or self[y][x] == CHEESE then
-        self[y][x] = EMPTY
+    self[x][y] = MOUSE
+end
+
+function Board:eat_recurse(x, y, what)
+    assert(x ~= nil)
+    assert(y ~= nil)
+
+    if self[x][y] == what or self[x][y] == CHEESE then
+        self[x][y] = EMPTY
     else
         return
     end
 
     if x < self.width then
-        self:eat(x + 1, y, what)
+        self:eat_recurse(x + 1, y, what)
     end
     if y < self.height then
-        self:eat(x, y + 1, what)
+        self:eat_recurse(x, y + 1, what)
     end
     if 1 < x then
-        self:eat(x - 1, y, what)
+        self:eat_recurse(x - 1, y, what)
     end
     if 1 < y then
-        self:eat(x, y - 1, what)
-    end
-
-    if is_first then
-        self[y][x] = MOUSE
+        self:eat_recurse(x, y - 1, what)
     end
 end
 
 function Board:has_cheese()
-    for i=1, self.height do
-        for j=1, self.width do
+    for i=1, self.width do
+        for j=1, self.height do
             if self[i][j] == CHEESE then
                 return true
             end
@@ -150,11 +178,57 @@ function Board:has_cheese()
     return false
 end
 
+function Board:equals(other)
+    if self.width ~= other.width or self.height ~= other.height then
+        return false
+    end
+    for i=1, self.width do
+        for j=1, self.height do
+            if self[i][j] ~= other[i][j] then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+function table.val_to_str ( v )
+    if "string" == type( v ) then
+        v = string.gsub( v, "\n", "\\n" )
+        if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
+            return "'" .. v .. "'"
+        end
+        return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
+    else
+        if "table" == type( v ) then
+            return table.tostring( v )
+        else
+            return tostring(v)
+        end
+    end
+end
+
+function table.tostring(tbl)
+    --Wtf lua, how am I supposed to debug stuff without this?
+    local result, done = {}, {}
+    for k, v in ipairs(tbl) do
+        table.insert( result, table.val_to_str( v ) )
+        done[k] = true
+    end
+    for k, v in pairs(tbl) do
+        if not done[ k ] then
+            table.insert( result,
+            table.val_to_str( k ) .. "=" .. table.val_to_str( v ) )
+        end
+    end
+    return "{" .. table.concat( result, "," ) .. "}"
+end
+
 function console_play()
     local board = Board:new(6, 4)
     board:fill_random()
     board[1][1] = MOUSE
-    board[board.height][board.width] = CHEESE
+    board[board.width][board.height] = CHEESE
     print('Type the x,y of the fruit you want to eat')
     local turns = 0
     print(board)
@@ -188,7 +262,7 @@ function test()
 
     board:fill_random()
     board[1][1] = MOUSE
-    board[board.height][board.width] = CHEESE
+    board[board.width][board.height] = CHEESE
     print(board)
 
     assert(board:is_legal(2,1))
@@ -197,12 +271,31 @@ function test()
     board:eat(2, 1)
     print(board)
     
+    local board_s = [[
+    M___b
+    gg_gb
+    ooogb
+    ggggb
+    Cbbbb
+    ]]
+    local expected_s = [[
+    ____b
+    M___b
+    ooo_b
+    ____b
+    _bbbb
+    ]]
+    board = Board:load(board_s)
+    expected = Board:load(expected_s)
+    board:eat(1, 2)
+    print(expected)
+    print(board)
+    assert(board:equals(expected))
 end
 
-
 if not package.loaded[...] then
-    --main case
-    --test()
-    console_play()
-else --module case
+    --main
+    test()
+    --console_play()
+else --module require
 end
