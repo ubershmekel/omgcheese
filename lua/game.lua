@@ -94,7 +94,7 @@ function Board:is_legal(x, y)
     return false
 end
 
-function Board:mouse_position()
+function Board:mouse_pos()
     for i=1, self.height do
         for j=1, self.width do
             if self[i][j] == MOUSE then
@@ -110,16 +110,16 @@ function Board:eat(x, y, what)
     if what == nil then
         assert(self:is_legal(x, y))
         what = self[y][x]
-        local mx, my = self:mouse_position()
+        local mx, my = self:mouse_pos()
         self[my][mx] = EMPTY
         is_first = true
     end
     
-    if self[y][x] ~= what then
+    if self[y][x] == what or self[y][x] == CHEESE then
+        self[y][x] = EMPTY
+    else
         return
     end
-    
-    self[y][x] = EMPTY
 
     if x < self.width then
         self:eat(x + 1, y, what)
@@ -139,6 +139,48 @@ function Board:eat(x, y, what)
     end
 end
 
+function Board:has_cheese()
+    for i=1, self.height do
+        for j=1, self.width do
+            if self[i][j] == CHEESE then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function console_play()
+    local board = Board:new(6, 4)
+    board:fill_random()
+    board[1][1] = MOUSE
+    board[board.height][board.width] = CHEESE
+    print('Type the x,y of the fruit you want to eat')
+    local turns = 0
+    print(board)
+    while board:has_cheese() do
+        line = io.read()
+        coords = {}
+        for num in string.gmatch(line, "%d+") do
+            table.insert(coords, tonumber(num))
+        end
+        if #coords ~= 2 then
+            print("! - Bad coords, I don't get it")
+            goto continue
+        end
+        if board:is_legal(coords[1], coords[2]) then
+            board:eat(coords[1], coords[2])
+            print(board)
+        else
+            print('! - illegal move')
+            goto continue
+        end
+        turns = turns + 1
+        ::continue::
+    end
+    print(string.format('Game over in %d turns', turns))
+end
+
 function test()
     print "main"
     local board = Board:new(6, 4)
@@ -152,7 +194,7 @@ function test()
     assert(board:is_legal(2,1))
     assert(board:is_legal(1,2))
     
-    board:eat(2,1)
+    board:eat(2, 1)
     print(board)
     
 end
@@ -160,6 +202,7 @@ end
 
 if not package.loaded[...] then
     --main case
-    test()
+    --test()
+    console_play()
 else --module case
 end
