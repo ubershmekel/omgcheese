@@ -68,7 +68,7 @@ function drawBoard()
     for y=1, ROWS do
         col = {}
         for x=1, COLS do
-            tile = MOAIProp2D.new ()
+            local tile = MOAIProp2D.new ()
             local what = board[x][y]
             tile:setDeck ( gfx[what] )
             tile:setLoc(x, y)
@@ -87,22 +87,46 @@ function init()
     drawBoard()
 end
 
+highlightProp = nil
+function highlight(sx, sy)
+    x, y = layer:wndToWorld(sx, sy)
+    x, y = math.ceil(x), math.ceil(y)
+    if board:is_legal(x, y) then
+        if highlightProp == nil then
+            highlightProp = MOAIProp2D.new ()
+            highlightProp:setDeck ( gfx[EMPTY] )
+            layer:insertProp(highlightProp)
+        end
+        highlightProp:setLoc(x, y)
+    else
+        layer:removeProp(highlightProp)
+        highlightProp = nil
+    end
+end
+
+function click(sx, sy)
+    x, y = layer:wndToWorld(sx, sy)
+    x, y = math.ceil(x), math.ceil(y)
+    if board:is_legal(x, y) then
+        board:eat(x, y)
+        drawBoard()
+        if not board:has_cheese() then
+            init()
+        end
+    end
+end
+
 
 init()
 
 MOAIInputMgr.device.touch:setCallback (
     function ( eventType, idx, sx, sy, tapCount )
-        if eventType ~= MOAITouchSensor.TOUCH_UP then
-            return
+        if eventType == MOAITouchSensor.TOUCH_UP then
+            layer:removeProp(highlightProp)
+            click(sx, sy)
         end
-        x, y = layer:wndToWorld(sx, sy)
-        x, y = math.ceil(x), math.ceil(y)
-        if board:is_legal(x, y) then
-            board:eat(x, y)
-            drawBoard()
-            if not board:has_cheese() then
-                init()
-            end
+        if eventType == MOAITouchSensor.TOUCH_DOWN or eventType == MOAITouchSensor.TOUCH_MOVE then
+            highlight(sx, sy)
         end
     end
 )
