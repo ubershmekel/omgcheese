@@ -100,6 +100,9 @@ MOAIInputMgr.device.touch:setCallback (
         if board:is_legal(x, y) then
             board:eat(x, y)
             drawBoard()
+            if not board:has_cheese() then
+                init()
+            end
         end
     end
 )
