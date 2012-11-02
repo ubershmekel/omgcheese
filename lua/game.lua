@@ -98,6 +98,8 @@ function Board:adjacent(x, y)
 end
 
 function Board:is_legal(x, y)
+    assert(type(x) == "number")
+    assert(type(y) == "number")
     local adj = self:adjacent(x, y)
     if self[x][y] == MOUSE or self[x][y] == EMPTY then
         return false

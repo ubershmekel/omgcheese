@@ -43,6 +43,7 @@ resources[CHEESE] = 'cheese.png'
 resources[BANANA] = 'banana.png'
 resources[ORANGE] = 'orange.png'
 resources[GRAPE] = 'grape.png'
+resources[EMPTY] = 'empty.png'
 
 gfx = {}
 for id, fname in pairs(resources) do
@@ -61,12 +62,9 @@ prop:setLoc(1.7, 1.7)
 layer:insertProp ( prop )
 prop:moveRot ( 360, 1.5 )]]
 
-function init()
-    board = Board:new(COLS, ROWS)
-    board:fill_random()
-    board[1][1] = MOUSE
-    board[COLS][ROWS] = CHEESE
+function drawBoard()
     tiles = {}
+    layer:clear()
     for y=1, ROWS do
         col = {}
         for x=1, COLS do
@@ -81,8 +79,28 @@ function init()
     end
 end
 
+function init()
+    board = Board:new(COLS, ROWS)
+    board:fill_random()
+    board[1][1] = MOUSE
+    board[COLS][ROWS] = CHEESE
+    drawBoard()
+end
+
+
 init()
 
-
-
+MOAIInputMgr.device.touch:setCallback (
+    function ( eventType, idx, sx, sy, tapCount )
+        if eventType ~= MOAITouchSensor.TOUCH_UP then
+            return
+        end
+        x, y = layer:wndToWorld(sx, sy)
+        x, y = math.ceil(x), math.ceil(y)
+        if board:is_legal(x, y) then
+            board:eat(x, y)
+            drawBoard()
+        end
+    end
+)
 
