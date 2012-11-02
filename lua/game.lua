@@ -3,8 +3,6 @@ A flooding game where you need to navigate the mouse to the cheese by eating
 fruit.
 ]]
 
-
-
 EMPTY = '_'
 MOUSE = 'M'
 CHEESE = 'C'
@@ -224,8 +222,9 @@ function table.tostring(tbl)
     return "{" .. table.concat( result, "," ) .. "}"
 end
 
+--[[MOAI is on 5.1 that doesn't have `goto`
 function console_play()
-    local board = Board:new(6, 4)
+    local board = Board:new(8, 6)
     board:fill_random()
     board[1][1] = MOUSE
     board[board.width][board.height] = CHEESE
@@ -253,7 +252,7 @@ function console_play()
         ::continue::
     end
     print(string.format('Game over in %d turns', turns))
-end
+end]]
 
 function test()
     print "main"

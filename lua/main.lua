@@ -4,23 +4,85 @@
 -- http://getmoai.com
 ----------------------------------------------------------------
 
-MOAISim.openWindow ( "test", 320, 480 )
+require 'game'
+
+screenWidth = MOAIEnvironment.horizontalResolution
+screenHeight = MOAIEnvironment.verticalResolution
+if screenWidth == nil then screenWidth = 320 end
+if screenHeight == nil then screenHeight = 480 end
+
+ROWS = 6
+COLS = 8
+
+--MOAISim.openWindow ( "test", WIDTH, HEIGHT )
+--moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
+MOAISim.openWindow ("test", screenWidth, screenHeight)
 
 viewport = MOAIViewport.new ()
-viewport:setSize ( 320, 480 )
-viewport:setScale ( 320, -480 )
-
+viewport:setSize ( screenWidth, screenHeight )
+viewport:setScale ( COLS, -ROWS )
+--viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
+viewport:setOffset(-1, 1) -- origin at top left
 layer = MOAILayer2D.new ()
 layer:setViewport ( viewport )
 MOAISim.pushRenderPass ( layer )
 
-gfxQuad = MOAIGfxQuad2D.new ()
-gfxQuad:setTexture ( "moai.png" )
-gfxQuad:setRect ( -128, -128, 128, 128 )
-gfxQuad:setUVRect ( 0, 0, 1, 1 )
+--[[function onDraw()
+    MOAIGfxDevice.setPenColor ( 1, 0, 0, 1 )
+    MOAIGfxDevice.setPenWidth ( 2 )
+    MOAIDraw.fillRect(1,1,3,3)
+end
 
-prop = MOAIProp2D.new ()
+scriptDeck = MOAIScriptDeck.new ()
+scriptDeck:setRect ( -4, -4, 4, 4 )
+scriptDeck:setDrawCallback ( onDraw )]]
+
+resources = {}
+resources[MOUSE] = 'mouse.png'
+resources[CHEESE] = 'cheese.png'
+resources[BANANA] = 'banana.png'
+resources[ORANGE] = 'orange.png'
+resources[GRAPE] = 'grape.png'
+
+gfx = {}
+for id, fname in pairs(resources) do
+    gfx[id] = MOAIGfxQuad2D.new()
+    gfx[id]:setTexture (fname)
+    gfx[id]:setRect (-1, -1, 0, 0)
+    gfx[id]:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
+end
+
+--gfxQuad:setRect ( 0, 0, 1, 1 )
+--gfxQuad:setUVRect ( 0, 1, 1, 0 ) -- landscape textures
+
+--[[prop = MOAIProp2D.new ()
 prop:setDeck ( gfxQuad )
+prop:setLoc(1.7, 1.7)
 layer:insertProp ( prop )
+prop:moveRot ( 360, 1.5 )]]
 
-prop:moveRot ( 360, 1.5 )
+function init()
+    board = Board:new(COLS, ROWS)
+    board:fill_random()
+    board[1][1] = MOUSE
+    board[COLS][ROWS] = CHEESE
+    tiles = {}
+    for y=1, ROWS do
+        col = {}
+        for x=1, COLS do
+            tile = MOAIProp2D.new ()
+            local what = board[x][y]
+            tile:setDeck ( gfx[what] )
+            tile:setLoc(x, y)
+            layer:insertProp (tile)
+            table.insert(col, tile)
+        end
+        table.insert(tiles, col)
+    end
+end
+
+init()
+
+
+
+
