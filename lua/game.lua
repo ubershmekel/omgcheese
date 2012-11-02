@@ -275,19 +275,23 @@ function test()
     local board_s = [[
     M___b
     gg_gb
-    ooogb
+    bbbgb
     ggggb
-    Cbbbb
+    Coobb
     ]]
     local expected_s = [[
     ____b
     M___b
-    ooo_b
+    bbb_b
     ____b
-    _bbbb
+    _oobb
     ]]
     board = Board:load(board_s)
     expected = Board:load(expected_s)
+
+    assert(not board:is_legal(1, 1))
+    assert(not board:is_legal(2, 5))
+
     board:eat(1, 2)
     print(expected)
     print(board)
