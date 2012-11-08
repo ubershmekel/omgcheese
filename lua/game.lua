@@ -123,6 +123,23 @@ function Board:mouse_pos()
         end
     end
 end
+--[[
+function Board:_eat_locs_recurse(x, y, found)
+    if 	
+end]]
+
+function Board:eat_locs(x, y)
+    assert(self:is_legal(x, y))
+    what = self[x][y]
+    local mx, my = self:mouse_pos()
+    self[mx][my] = EMPTY
+    for i, pos in ipairs(self:legal_moves()) do
+        if self[pos.x][pos.y] == what then
+            self:eat_recurse(pos.x, pos.y, what)
+        end
+    end
+    self[x][y] = MOUSE
+end
 
 function Board:eat(x, y)
     assert(self:is_legal(x, y))
@@ -172,7 +189,7 @@ function Board:has_cheese()
     return false
 end
 
-function Board:equals(other)
+function Board.mt:__eq(other)
     if self.width ~= other.width or self.height ~= other.height then
         return false
     end
@@ -270,13 +287,12 @@ function test()
     board:eat(1, 2)
     print(expected)
     print(board)
-    assert(board:equals(expected))
+    assert(board == expected)
     
     board = Board:load(board_s)
     local legal = board:legal_moves()
     local expected_legal = {{x=1,y=2},{x=2,y=2},{x=3,y=3},{x=4,y=2}, {x=5,y=1}}
     print(table.tostring(legal))
-    print(table.tostring(expected_legal))
     assert(recursive_compare(legal, expected_legal))
 end
 

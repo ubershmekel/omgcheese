@@ -11,18 +11,20 @@ SDK = open('sdk_location.txt').read().strip()
 WINRUN = '/bin/win32/moai.exe'
 OSXRUN = '/bin/osx/moai'
 
-SUFFIX = ' ../config.lua main.lua'
+SUFFIX = ' config.lua main.lua'
 
 if platform.system() == "Windows":
     run = WINRUN
 else:
     run = OSXRUN
 
-line = SDK + run + SUFFIX
-print(line)
 
 os.chdir('host-chrome')
 subprocess.check_call('bash sdk-setup.sh', shell=True)
+
+os.chdir('build')
+line = SDK + run + SUFFIX
+print(line)
 subprocess.check_call(line, shell=True)
 
 #print('--- press enter ---')

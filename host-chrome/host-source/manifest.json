@@ -1,0 +1,16 @@
+{
+    "name": "OMG Cheese",
+    "description": "Eat fruit, get cheese, mouse happy.",
+    "version": "1.0",
+    "manifest_version": 2,
+    "icons": {
+        "16": "Icon_16.png",
+        "128": "Icon_128.png"
+    },
+    "permissions": ["unlimitedStorage", "http://*/", "https://*/"],
+    "app": {
+        "launch": {
+            "local_path": "Moai.html"
+        }
+    }
+}

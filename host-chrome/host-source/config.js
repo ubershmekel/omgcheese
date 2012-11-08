@@ -1,0 +1,2 @@
+Moai = {};
+Moai.isRelease = true;

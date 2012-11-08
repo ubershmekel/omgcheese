@@ -164,7 +164,7 @@ function click(sx, sy)
     hoverProp:setVisible(false)
     if board:is_legal(x, y) then
         board:eat(x, y)
-        particle:go(fgLayer, 2,2,3,3)
+        --particle:go(fgLayer, 2,2,3,3)
         drawBoard()
         if not board:has_cheese() then
             initBoard()
