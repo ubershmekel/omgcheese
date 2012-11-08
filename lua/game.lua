@@ -3,6 +3,8 @@ A flooding game where you need to navigate the mouse to the cheese by eating
 fruit.
 ]]
 
+require 'utils'
+
 EMPTY = '_'
 MOUSE = 'M'
 CHEESE = 'C'
@@ -127,17 +129,9 @@ function Board:eat(x, y)
     what = self[x][y]
     local mx, my = self:mouse_pos()
     self[mx][my] = EMPTY
-    for i=1, self.width do
-        for j=1, self.height do
-            if self[i][j] == EMPTY then
-                local adj = self:adjacent(i, j)
-                for pos, val in pairs(adj) do
-                    --print(table.tostring(pos), val)
-                    if val == what then
-                        self:eat_recurse(pos.x, pos.y, what)
-                    end
-                end
-            end
+    for i, pos in ipairs(self:legal_moves()) do
+        if self[pos.x][pos.y] == what then
+            self:eat_recurse(pos.x, pos.y, what)
         end
     end
     self[x][y] = MOUSE
@@ -192,39 +186,20 @@ function Board:equals(other)
     return true
 end
 
-function table.val_to_str ( v )
-    if "string" == type( v ) then
-        v = string.gsub( v, "\n", "\\n" )
-        if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
-            return "'" .. v .. "'"
-        end
-        return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
-    else
-        if "table" == type( v ) then
-            return table.tostring( v )
-        else
-            return tostring(v)
+function Board:legal_moves()
+    local legals = {}
+    for i=1, self.width do
+        for j=1, self.height do
+            if self:is_legal(i, j) then
+                table.insert(legals, {x=i, y=j})
+            end
         end
     end
+    return legals
 end
 
-function table.tostring(tbl)
-    --Wtf lua, how am I supposed to debug stuff without this?
-    local result, done = {}, {}
-    for k, v in ipairs(tbl) do
-        table.insert( result, table.val_to_str( v ) )
-        done[k] = true
-    end
-    for k, v in pairs(tbl) do
-        if not done[ k ] then
-            table.insert( result,
-            table.val_to_str( k ) .. "=" .. table.val_to_str( v ) )
-        end
-    end
-    return "{" .. table.concat( result, "," ) .. "}"
-end
 
---[[MOAI is on 5.1 that doesn't have `goto`
+--[[MOAI is on lua5.1 that doesn't have `goto`
 function console_play()
     local board = Board:new(8, 6)
     board:fill_random()
@@ -296,6 +271,13 @@ function test()
     print(expected)
     print(board)
     assert(board:equals(expected))
+    
+    board = Board:load(board_s)
+    local legal = board:legal_moves()
+    local expected_legal = {{x=1,y=2},{x=2,y=2},{x=3,y=3},{x=4,y=2}, {x=5,y=1}}
+    print(table.tostring(legal))
+    print(table.tostring(expected_legal))
+    assert(recursive_compare(legal, expected_legal))
 end
 
 if not package.loaded[...] then

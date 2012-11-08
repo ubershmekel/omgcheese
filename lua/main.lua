@@ -5,14 +5,23 @@
 ----------------------------------------------------------------
 
 require 'game'
+require 'particle'
 
 screenWidth = MOAIEnvironment.horizontalResolution
 screenHeight = MOAIEnvironment.verticalResolution
 if screenWidth == nil then screenWidth = 800 end
 if screenHeight == nil then screenHeight = 480 end
 
-ROWS = 6
-COLS = 10
+ROWS = 9
+COLS = 16
+
+function getGfx(fname)
+    local quad = MOAIGfxQuad2D.new()
+    quad:setTexture (fname)
+    quad:setRect (-1, -1, 0, 0)
+    quad:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
+    return quad
+end
 
 --MOAISim.openWindow ( "test", WIDTH, HEIGHT )
 --moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
@@ -28,9 +37,17 @@ bgLayer = MOAILayer2D.new ()
 bgLayer:setViewport ( viewport )
 MOAISim.pushRenderPass ( bgLayer )
 
-layer = MOAILayer2D.new ()
-layer:setViewport ( viewport )
-MOAISim.pushRenderPass ( layer )
+highlightsLayer = MOAILayer2D.new ()
+highlightsLayer:setViewport ( viewport )
+MOAISim.pushRenderPass ( highlightsLayer )
+
+tilesLayer = MOAILayer2D.new ()
+tilesLayer:setViewport ( viewport )
+MOAISim.pushRenderPass ( tilesLayer )
+
+fgLayer = MOAILayer2D.new ()
+fgLayer:setViewport ( viewport )
+MOAISim.pushRenderPass ( fgLayer )
 
 --MOAIGfxDevice.setClearColor(0.58, 0.81, 0.98, 1)
 
@@ -45,19 +62,19 @@ scriptDeck:setRect ( -4, -4, 4, 4 )
 scriptDeck:setDrawCallback ( onDraw )]]
 
 resources = {}
-resources[MOUSE] = 'mouse.png'
+resources[MOUSE] = 'gopher.png'
 resources[CHEESE] = 'cheese.png'
 resources[BANANA] = 'banana.png'
 resources[ORANGE] = 'orange.png'
 resources[GRAPE] = 'grape.png'
 resources[EMPTY] = 'empty.png'
 
+highlightGfx = getGfx('highlight.png')
+
+
 gfx = {}
 for id, fname in pairs(resources) do
-    gfx[id] = MOAIGfxQuad2D.new()
-    gfx[id]:setTexture (fname)
-    gfx[id]:setRect (-1, -1, 0, 0)
-    gfx[id]:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
+    gfx[id] = getGfx(fname)
 end
 
 function setBackground()
@@ -85,7 +102,8 @@ prop:moveRot ( 360, 1.5 )]]
 mouseProp = nil
 function drawBoard()
     tiles = {}
-    layer:clear()
+    tilesLayer:clear()
+    highlightsLayer:clear()
     --setBackground()
     for y=1, ROWS do
         col = {}
@@ -94,11 +112,17 @@ function drawBoard()
             local what = board[x][y]
             tileProp:setDeck ( gfx[what] )
             tileProp:setLoc(x, y)
-            layer:insertProp (tileProp)
+            tilesLayer:insertProp (tileProp)
             table.insert(col, tileProp)
             
             if what == MOUSE then
                 mouseProp = tileProp
+            end
+            if board:is_legal(x, y) then
+                local highlightProp = MOAIProp2D.new ()
+                highlightProp:setDeck(highlightGfx)
+                highlightProp:setLoc(x, y)
+                highlightsLayer:insertProp(highlightProp)
             end
         end
         table.insert(tiles, col)
@@ -113,29 +137,34 @@ function initBoard()
     drawBoard()
 end
 
-highlightProp = nil
+hoverProp = MOAIProp2D.new ()
+hoverProp:setDeck ( gfx[MOUSE] )
+hoverProp:setVisible(false)
+fgLayer:insertProp(hoverProp)
+
 function mouseOver(sx, sy)
-    x, y = layer:wndToWorld(sx, sy)
+    if mouseProp == nil then
+        return
+    end
+    x, y = tilesLayer:wndToWorld(sx, sy)
     x, y = math.ceil(x), math.ceil(y)
     if board:is_legal(x, y) then
-        if highlightProp == nil then
-            highlightProp = MOAIProp2D.new ()
-            highlightProp:setDeck ( gfx[MOUSE] )
-            layer:insertProp(highlightProp)
-        end
-        highlightProp:setLoc(x, y)
-    elseif highlightProp ~= nil then
-        -- illegal move so get rid of highlight
-        layer:removeProp(highlightProp)
-        highlightProp = nil
+        mouseProp:setVisible(false)
+        hoverProp:setVisible(true)
+        hoverProp:setLoc(x, y)
+    else
+        mouseProp:setVisible(true)
+        hoverProp:setVisible(false)
     end
 end
 
 function click(sx, sy)
-    x, y = layer:wndToWorld(sx, sy)
+    x, y = tilesLayer:wndToWorld(sx, sy)
     x, y = math.ceil(x), math.ceil(y)
+    hoverProp:setVisible(false)
     if board:is_legal(x, y) then
         board:eat(x, y)
+        particle:go(fgLayer, 2,2,3,3)
         drawBoard()
         if not board:has_cheese() then
             initBoard()
@@ -149,7 +178,7 @@ function setupControl()
         MOAIInputMgr.device.touch:setCallback (
             function ( eventType, idx, sx, sy, tapCount )
                 if eventType == MOAITouchSensor.TOUCH_UP then
-                    layer:removeProp(highlightProp)
+                    --tilesLayer:removeProp(highlightProp)
                     click(sx, sy)
                 end
                 if eventType == MOAITouchSensor.TOUCH_DOWN or eventType == MOAITouchSensor.TOUCH_MOVE then
