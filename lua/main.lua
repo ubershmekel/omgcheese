@@ -12,8 +12,8 @@ screenHeight = MOAIEnvironment.verticalResolution
 if screenWidth == nil then screenWidth = 800 end
 if screenHeight == nil then screenHeight = 480 end
 
-ROWS = 9
-COLS = 16
+ROWS = 6
+COLS = 12
 
 function getGfx(fname)
     local quad = MOAIGfxQuad2D.new()
@@ -33,19 +33,23 @@ viewport:setScale ( COLS, -ROWS )
 --viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
 viewport:setOffset(-1, 1) -- origin at top left
 
-bgLayer = MOAILayer2D.new ()
+local bgLayer = MOAILayer2D.new ()
 bgLayer:setViewport ( viewport )
 MOAISim.pushRenderPass ( bgLayer )
 
-highlightsLayer = MOAILayer2D.new ()
+local highlightsLayer = MOAILayer2D.new ()
 highlightsLayer:setViewport ( viewport )
 MOAISim.pushRenderPass ( highlightsLayer )
 
-tilesLayer = MOAILayer2D.new ()
+local targetsLayer = MOAILayer2D.new ()
+targetsLayer:setViewport ( viewport )
+MOAISim.pushRenderPass ( targetsLayer )
+
+local tilesLayer = MOAILayer2D.new ()
 tilesLayer:setViewport ( viewport )
 MOAISim.pushRenderPass ( tilesLayer )
 
-fgLayer = MOAILayer2D.new ()
+local fgLayer = MOAILayer2D.new ()
 fgLayer:setViewport ( viewport )
 MOAISim.pushRenderPass ( fgLayer )
 
@@ -61,7 +65,7 @@ scriptDeck = MOAIScriptDeck.new ()
 scriptDeck:setRect ( -4, -4, 4, 4 )
 scriptDeck:setDrawCallback ( onDraw )]]
 
-resources = {}
+local resources = {}
 resources[MOUSE] = 'gopher.png'
 resources[CHEESE] = 'cheese.png'
 resources[BANANA] = 'banana.png'
@@ -69,10 +73,11 @@ resources[ORANGE] = 'orange.png'
 resources[GRAPE] = 'grape.png'
 resources[EMPTY] = 'empty.png'
 
-highlightGfx = getGfx('highlight.png')
+local highlightGfx = getGfx('highlight.png')
+local targetGfx = getGfx('target.png')
 
 
-gfx = {}
+local gfx = {}
 for id, fname in pairs(resources) do
     gfx[id] = getGfx(fname)
 end
@@ -99,11 +104,13 @@ prop:setLoc(1.7, 1.7)
 layer:insertProp ( prop )
 prop:moveRot ( 360, 1.5 )]]
 
-mouseProp = nil
+local board = nil
+local mouseProp = nil
 function drawBoard()
     tiles = {}
     tilesLayer:clear()
     highlightsLayer:clear()
+    targetsLayer:clear()
     --setBackground()
     for y=1, ROWS do
         col = {}
@@ -137,24 +144,44 @@ function initBoard()
     drawBoard()
 end
 
-hoverProp = MOAIProp2D.new ()
+local hoverProp = MOAIProp2D.new ()
 hoverProp:setDeck ( gfx[MOUSE] )
 hoverProp:setVisible(false)
 fgLayer:insertProp(hoverProp)
+
+local recentHighlightX = nil
+local recentHighlightY = nil
+local function highlightTargets(x, y)
+    if recentHighlightX == x and recentHighlightY == y then
+        return
+    end
+    targetsLayer:clear()
+    for _, pos in pairs(board:eat_locs(x, y)) do
+        local targetProp = MOAIProp2D.new ()
+        targetProp:setDeck(targetGfx)
+        targetProp:setLoc(pos.x, pos.y)
+        targetsLayer:insertProp(targetProp)
+    end
+    recentHighlightX = x
+    recentHighlightY = y
+end
 
 function mouseOver(sx, sy)
     if mouseProp == nil then
         return
     end
-    x, y = tilesLayer:wndToWorld(sx, sy)
+    local x, y = tilesLayer:wndToWorld(sx, sy)
     x, y = math.ceil(x), math.ceil(y)
     if board:is_legal(x, y) then
         mouseProp:setVisible(false)
         hoverProp:setVisible(true)
         hoverProp:setLoc(x, y)
+        highlightTargets(x, y)
     else
         mouseProp:setVisible(true)
         hoverProp:setVisible(false)
+        targetsLayer:clear()
+        recentHighlightX = nil
     end
 end
 

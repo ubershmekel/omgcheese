@@ -19,8 +19,8 @@
 # the assets directory of the bundle
 #----------------------------------------------------------------#
 
-	src_dirs=( "../lua" "../images" "../lua-modules" )
-	dest_dirs=(	"lua" "lua" "lua/lua-modules" )
+	src_dirs=( "../lua" "../images")
+	dest_dirs=(	"lua" "lua"  )
 
 #----------------------------------------------------------------#
 # debug & release settings

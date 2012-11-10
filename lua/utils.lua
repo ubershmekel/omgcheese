@@ -3,6 +3,14 @@ General lua tools.
 
 ]]
 
+function table.key_to_str ( k )
+    if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
+        return k
+    else
+        return "[" .. table.val_to_str( k ) .. "]"
+    end
+end
+
 function table.val_to_str ( v )
     if "string" == type( v ) then
         v = string.gsub( v, "\n", "\\n" )
@@ -29,7 +37,7 @@ function table.tostring(tbl)
     for k, v in pairs(tbl) do
         if not done[ k ] then
             table.insert( result,
-            table.val_to_str( k ) .. "=" .. table.val_to_str( v ) )
+            table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
         end
     end
     return "{" .. table.concat( result, "," ) .. "}"
@@ -73,11 +81,56 @@ function recursive_compare(t1,t2)
   return true  
 end
 
+Set = {}
+Set.mt = { __index = Set }
+
+function Set:new()
+    local object = {}
+    setmetatable(object, Set.mt)
+    return object
+end
+
+function Set:add(item)
+    -- hash as key
+    assert(item ~= nil)
+    local hash = table.tostring(item)
+    self[hash] = item
+end
+
+function Set:contains(item)
+    assert(item ~= nil)
+    local hash = table.tostring(item)
+    if self[hash] == nil then
+        return false
+    else
+        return true
+    end
+end
+
+function Set.mt:__tostring()
+    local result = {}
+    for hash, val in pairs(self) do
+        table.insert(result, table.tostring(val))
+    end
+    return "{" .. table.concat(result, ",") .. "}"
+end
+
+function Set.mt:__eq(other)
+    return recursive_compare(self, other)
+end
 
 function test()
     assert(    recursive_compare( {1,2,3,{1,2,1}}, {1,2,3,{1,2,1}} ) )
     assert(not recursive_compare( {1,2,3,{1,2,1}}, {1,2,3,{2,1,1}} ) )
     assert(not recursive_compare( {1,2,3,{1,2,1}}, {2,2,3,{1,2,1}} ) )
+    
+    local s = Set:new()
+    s:add({x=1, y=2})
+    s:add({x=2, y=3})
+
+    -- check if a new point is equally hashed to the first one
+    assert(s:contains({x=1, y=2}))
+    print(s)
 end
 
 
