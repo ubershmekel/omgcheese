@@ -74,10 +74,11 @@ scriptDeck:setDrawCallback ( onDraw )]]
 
 local resources = {}
 resources[MOUSE] = 'gopher.png'
-resources[CHEESE] = 'cheese.png'
+resources[CHEESE] = 'cake.png'
 resources[BANANA] = 'banana.png'
 resources[ORANGE] = 'orange.png'
 resources[GRAPE] = 'grape.png'
+resources[KIWI] = 'kiwi.png'
 resources[EMPTY] = 'empty.png'
 
 local highlightGfx = getGfx('highlight.png')

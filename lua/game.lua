@@ -13,8 +13,9 @@ WALL = 'W'
 GRAPE = 'g'
 BANANA = 'b'
 ORANGE = 'o'
+KIWI = 'k'
 
-FRUIT = {GRAPE, BANANA, ORANGE}
+FRUIT = {GRAPE, BANANA, ORANGE, KIWI}
 
 Board = {}
 Board.mt = { __index = Board }
