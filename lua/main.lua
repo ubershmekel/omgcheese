@@ -23,6 +23,13 @@ function getGfx(fname)
     return quad
 end
 
+local function wait ( action )
+    -- wait for animation to finish
+    -- http://getmoai.com/wiki/index.php?title=Moai_SDK_Basics_Part_Two
+    assert(action ~= nil)
+    while action:isBusy() do coroutine:yield() end
+end
+
 --MOAISim.openWindow ( "test", WIDTH, HEIGHT )
 --moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
 MOAISim.openWindow ("test", screenWidth, screenHeight)
@@ -106,21 +113,23 @@ prop:moveRot ( 360, 1.5 )]]
 
 local board = nil
 local mouseProp = nil
+local tiles = nil
 function drawBoard()
     tiles = {}
     tilesLayer:clear()
     highlightsLayer:clear()
     targetsLayer:clear()
     --setBackground()
-    for y=1, ROWS do
+    for x=1, COLS do
         col = {}
-        for x=1, COLS do
+        table.insert(tiles, col)
+        for y=1, ROWS do
             local tileProp = MOAIProp2D.new ()
             local what = board[x][y]
             tileProp:setDeck ( gfx[what] )
             tileProp:setLoc(x, y)
             tilesLayer:insertProp (tileProp)
-            table.insert(col, tileProp)
+            tiles[x][y] = tileProp
             
             if what == MOUSE then
                 mouseProp = tileProp
@@ -132,7 +141,6 @@ function drawBoard()
                 highlightsLayer:insertProp(highlightProp)
             end
         end
-        table.insert(tiles, col)
     end
 end
 
@@ -166,6 +174,36 @@ local function highlightTargets(x, y)
     recentHighlightY = y
 end
 
+local function endGame()
+    mouseProp:seekLoc(COLS / 2, ROWS / 2, 1)
+    mouseProp:moveRot(360, 2)
+    wait(mouseProp:seekScl(3, 3, 3))
+    initBoard()
+end
+
+
+local function animateEat(x, y)
+    targetsLayer:clear()
+    highlightsLayer:clear()
+    mouseProp:setVisible(true)
+    hoverProp:setVisible(false)
+    local function threadAnim()
+        for _, pos in pairs(board:eat_locs(x, y)) do
+            wait ( mouseProp:seekLoc ( pos.x, pos.y, 0.1))
+            tiles[pos.x][pos.y]:setDeck(gfx[EMPTY])
+        end
+        board:eat(x, y)
+        drawBoard()
+
+        if not board:has_cheese() then
+            endGame()
+        end
+    end
+    
+    local thread = MOAIThread.new ()
+    thread:run ( threadAnim )
+end
+
 function mouseOver(sx, sy)
     if mouseProp == nil then
         return
@@ -190,12 +228,10 @@ function click(sx, sy)
     x, y = math.ceil(x), math.ceil(y)
     hoverProp:setVisible(false)
     if board:is_legal(x, y) then
-        board:eat(x, y)
+        --board:eat(x, y)
         --particle:go(fgLayer, 2,2,3,3)
-        drawBoard()
-        if not board:has_cheese() then
-            initBoard()
-        end
+        --drawBoard()
+        animateEat(x, y)
     end
 end
 
