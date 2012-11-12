@@ -1,6 +1,6 @@
 --[[
-A flooding game where you need to navigate the mouse to the cheese by eating
-fruit.
+The logic for a flooding game where you need to navigate the mouse to the
+cheese by eating fruit.
 ]]
 
 require 'utils'

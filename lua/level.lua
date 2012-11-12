@@ -1,21 +1,24 @@
-----------------------------------------------------------------
--- Copyright (c) 2010-2011 Zipline Games, Inc. 
--- All Rights Reserved. 
--- http://getmoai.com
-----------------------------------------------------------------
-
-require 'game'
+require 'mymoai'
+require 'board'
 require 'particle'
 
-screenWidth = MOAIEnvironment.horizontalResolution
-screenHeight = MOAIEnvironment.verticalResolution
+local screenWidth = MOAIEnvironment.horizontalResolution
+local screenHeight = MOAIEnvironment.verticalResolution
 if screenWidth == nil then screenWidth = 800 end
 if screenHeight == nil then screenHeight = 480 end
 
-ROWS = 6
-COLS = 12
+local ROWS = 6
+local COLS = 12
 
-function getGfx(fname)
+
+local bgLayer = nil
+local targetsLayer = nil
+local tilesLayer = nil
+local fgLayer = nil
+
+
+
+local function getGfx(fname)
     local quad = MOAIGfxQuad2D.new()
     quad:setTexture (fname)
     quad:setRect (-1, -1, 0, 0)
@@ -23,42 +26,7 @@ function getGfx(fname)
     return quad
 end
 
-local function wait ( action )
-    -- wait for animation to finish
-    -- http://getmoai.com/wiki/index.php?title=Moai_SDK_Basics_Part_Two
-    assert(action ~= nil)
-    while action:isBusy() do coroutine:yield() end
-end
-
---MOAISim.openWindow ( "test", WIDTH, HEIGHT )
---moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
-MOAISim.openWindow ("test", screenWidth, screenHeight)
-
-viewport = MOAIViewport.new ()
-viewport:setSize ( screenWidth, screenHeight )
-viewport:setScale ( COLS, -ROWS )
---viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
-viewport:setOffset(-1, 1) -- origin at top left
-
-local bgLayer = MOAILayer2D.new ()
-bgLayer:setViewport ( viewport )
-MOAISim.pushRenderPass ( bgLayer )
-
-local highlightsLayer = MOAILayer2D.new ()
-highlightsLayer:setViewport ( viewport )
-MOAISim.pushRenderPass ( highlightsLayer )
-
-local targetsLayer = MOAILayer2D.new ()
-targetsLayer:setViewport ( viewport )
-MOAISim.pushRenderPass ( targetsLayer )
-
-local tilesLayer = MOAILayer2D.new ()
-tilesLayer:setViewport ( viewport )
-MOAISim.pushRenderPass ( tilesLayer )
-
-local fgLayer = MOAILayer2D.new ()
-fgLayer:setViewport ( viewport )
-MOAISim.pushRenderPass ( fgLayer )
+Level = {}
 
 --MOAIGfxDevice.setClearColor(0.58, 0.81, 0.98, 1)
 
@@ -100,8 +68,6 @@ function setBackground()
     bgLayer:insertProp (bgProp)
     bgProp:setLoc(1, 1)
 end
-
-setBackground()
 
 --gfxQuad:setRect ( 0, 0, 1, 1 )
 --gfxQuad:setUVRect ( 0, 1, 1, 0 ) -- landscape textures
@@ -153,10 +119,7 @@ function initBoard()
     drawBoard()
 end
 
-local hoverProp = MOAIProp2D.new ()
-hoverProp:setDeck ( gfx[MOUSE] )
-hoverProp:setVisible(false)
-fgLayer:insertProp(hoverProp)
+local hoverProp = nil
 
 local recentHighlightX = nil
 local recentHighlightY = nil
@@ -237,41 +200,44 @@ function click(sx, sy)
 end
 
 
-function setupControl()
-    if MOAIInputMgr.device.touch ~= nil then
-        MOAIInputMgr.device.touch:setCallback (
-            function ( eventType, idx, sx, sy, tapCount )
-                if eventType == MOAITouchSensor.TOUCH_UP then
-                    --tilesLayer:removeProp(highlightProp)
-                    click(sx, sy)
-                end
-                if eventType == MOAITouchSensor.TOUCH_DOWN or eventType == MOAITouchSensor.TOUCH_MOVE then
-                    mouseOver(sx, sy)
-                end
-            end
-        )
-    end
-    if MOAIInputMgr.device.pointer ~= nil then
-        MOAIInputMgr.device.mouseLeft:setCallback (
-            function(isMouseDown)
-                if(isMouseDown) then
-                    -- mouseDown
-                else
-                    -- mouseUp
-                    click(MOAIInputMgr.device.pointer:getLoc())
-                end
-            end
-        )
-        MOAIInputMgr.device.pointer:setCallback (
-            function(sx, sy)
-                mouseOver(MOAIInputMgr.device.pointer:getLoc())
-            end
-        )
-    end
+function Level:init()
+    --MOAISim.openWindow ( "test", WIDTH, HEIGHT )
+    --moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
+    MOAISim.openWindow ("test", screenWidth, screenHeight)
+
+    viewport = MOAIViewport.new ()
+    viewport:setSize ( screenWidth, screenHeight )
+    viewport:setScale ( COLS, -ROWS )
+    --viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
+    viewport:setOffset(-1, 1) -- origin at top left
+
+    bgLayer = MOAILayer2D.new ()
+    bgLayer:setViewport ( viewport )
+    MOAISim.pushRenderPass ( bgLayer )
+
+    highlightsLayer = MOAILayer2D.new ()
+    highlightsLayer:setViewport ( viewport )
+    MOAISim.pushRenderPass ( highlightsLayer )
+
+    targetsLayer = MOAILayer2D.new ()
+    targetsLayer:setViewport ( viewport )
+    MOAISim.pushRenderPass ( targetsLayer )
+
+    tilesLayer = MOAILayer2D.new ()
+    tilesLayer:setViewport ( viewport )
+    MOAISim.pushRenderPass ( tilesLayer )
+
+    fgLayer = MOAILayer2D.new ()
+    fgLayer:setViewport ( viewport )
+    MOAISim.pushRenderPass ( fgLayer )
+    
+    hoverProp = MOAIProp2D.new ()
+    hoverProp:setDeck ( gfx[MOUSE] )
+    hoverProp:setVisible(false)
+    fgLayer:insertProp(hoverProp)
+
+    setBackground()
+    initBoard()
+    setupControl(mouseOver, click)
 end
-
-
-
-initBoard()
-setupControl()
 
