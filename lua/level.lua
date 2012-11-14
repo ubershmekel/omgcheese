@@ -2,6 +2,8 @@ require 'mymoai'
 require 'board'
 require 'particle'
 
+Level = {}
+
 local screenWidth = MOAIEnvironment.horizontalResolution
 local screenHeight = MOAIEnvironment.verticalResolution
 if screenWidth == nil then screenWidth = 800 end
@@ -10,13 +12,10 @@ if screenHeight == nil then screenHeight = 480 end
 local ROWS = 6
 local COLS = 12
 
-
 local bgLayer = nil
 local targetsLayer = nil
 local tilesLayer = nil
 local fgLayer = nil
-
-
 
 local function getGfx(fname)
     local quad = MOAIGfxQuad2D.new()
@@ -25,8 +24,6 @@ local function getGfx(fname)
     quad:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
     return quad
 end
-
-Level = {}
 
 --MOAIGfxDevice.setClearColor(0.58, 0.81, 0.98, 1)
 
@@ -168,7 +165,7 @@ local function animateEat(x, y)
     thread:run ( threadAnim )
 end
 
-function mouseOver(sx, sy)
+local function mouseOver(sx, sy)
     if mouseProp == nil then
         return
     end
@@ -187,7 +184,7 @@ function mouseOver(sx, sy)
     end
 end
 
-function click(sx, sy)
+local function click(sx, sy)
     x, y = tilesLayer:wndToWorld(sx, sy)
     x, y = math.ceil(x), math.ceil(y)
     hoverProp:setVisible(false)

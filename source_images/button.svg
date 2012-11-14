@@ -12,13 +12,16 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="Button"
    version="1.1"
-   width="240"
-   height="100"
+   width="256"
+   height="128"
    role="button"
    onload="init()"
    aria-pressed="false"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="buttonG.svg">
+   sodipodi:docname="button.svg"
+   inkscape:export-filename="/home/yuv/Dropbox/dev/github/omgcheese/images/buttonEmpty.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <metadata
      id="metadata28">
     <rdf:RDF>
@@ -27,6 +30,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -43,13 +47,16 @@
      inkscape:window-height="744"
      id="namedview26"
      showgrid="false"
-     inkscape:zoom="1.2166667"
-     inkscape:cx="120"
-     inkscape:cy="50"
+     inkscape:zoom="2.4333333"
+     inkscape:cx="150.80733"
+     inkscape:cy="54.137283"
      inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     inkscape:showpageshadow="true"
+     showguides="true"
+     inkscape:guide-bbox="true" />
   <style
      type="text/css"
      id="style3">
@@ -69,11 +76,13 @@
 
         <!-- Get color from style -->
 
+
         var color = window.frameElement.style.color;
 	var ButtonBase  = document.getElementById(&quot;ButtonBase&quot;);
         ButtonBase.style.fill=color;
 
 	<!-- Get text from params -->
+
 
 	for( var i = 0; i &lt; window.frameElement.childNodes.length; i++ ) {
 	  var node = window.frameElement.childNodes[ i ];
@@ -92,6 +101,7 @@
 	TextShadow.firstChild.nodeValue = textOff;
 
 	<!-- Set initial HTML text -->
+
 
 	var frameId = window.frameElement.id;
 	top.status(textOff, frameId);
@@ -163,7 +173,8 @@
        y2="50"
        id="linearGradient3113"
        xlink:href="#linearGradient3030"
-       gradientUnits="userSpaceOnUse" />
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.1494396,0,0,1.5753425,-9.9327505,-42.328767)" />
     <radialGradient
        cx="161.81506"
        cy="175.34247"
@@ -173,49 +184,53 @@
        id="radialGradient3165"
        xlink:href="#linearGradient3159"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0,-0.72727275,2,0,-220,170)" />
+       gradientTransform="matrix(0,-1.1457037,2.2988792,0,-262.80947,225.47945)" />
   </defs>
   <g
      id="layer1"
      onkeydown="return buttonEvent(evt);"
-     onclick="return buttonEvent(evt);">
+     onclick="return buttonEvent(evt);"
+     transform="translate(0,28)">
     <rect
-       width="220"
-       height="80"
-       ry="40"
-       x="10"
-       y="10"
+       width="252.87671"
+       height="126.0274"
+       ry="63.013699"
+       x="1.5616455"
+       y="-26.575342"
        id="ButtonBase"
-       style="fill:#ffd000;stroke:none;fill-opacity:1" />
+       style="fill:#ffd000;fill-opacity:1;stroke:none" />
     <rect
-       width="220"
-       height="80"
-       ry="40"
-       x="10"
-       y="10"
+       width="252.87671"
+       height="126.0274"
+       ry="63.013699"
+       x="1.5616455"
+       y="-26.575342"
        id="ButtonGlow"
-       style="fill:url(#radialGradient3165);stroke:none;opacity:0.44015443999999998" />
+       style="opacity:0.44015443;fill:url(#radialGradient3165);stroke:none" />
     <text
-       x="120"
-       y="66"
+       x="149.92802"
+       y="52.655678"
        id="text3194"
        xml:space="preserve"
-       style="font-size:40px;text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-family:Sans"><tspan
-         x="120"
-         y="66"
-         id="TextShadow">OFF</tspan></text>
+       style="font-size:53.82580566px;text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-family:Sans"
+       transform="scale(0.85419221,1.1706967)"><tspan
+         x="149.92802"
+         y="52.655678"
+         id="TextShadow">LEVELS</tspan></text>
     <text
-       x="120"
-       y="64.5"
+       x="149.92802"
+       y="50.637211"
        id="text3198"
        xml:space="preserve"
-       style="font-size:40px;text-align:center;text-anchor:middle;fill:#ffffff;stroke:none;font-family:Sans"><tspan
-         x="120"
-         y="64.5"
-         id="Text">OFF</tspan></text>
+       style="font-size:53.82580566px;text-align:center;text-anchor:middle;fill:#ffffff;stroke:none;font-family:Sans"
+       transform="scale(0.85419221,1.1706967)"><tspan
+         x="149.92802"
+         y="50.637211"
+         id="Text">LEVELS</tspan></text>
     <path
-       d="m 50,15 140,0 c 11.08,0 22.51667,10.914 20,20 C 208.16563,41.622482 201.08,40 190,40 L 50,40 C 38.92,40 31.834332,41.622512 30,35 27.483323,25.914 38.92,15 50,15 z"
+       d="m 47.53923,-18.698631 160.92154,0 c 12.73579,0 25.88155,17.1932886 22.98879,31.50685 -2.10849,10.432678 -10.253,7.876713 -22.98879,7.876713 l -160.92154,0 c -12.735791,0 -20.880339,2.556012 -22.988792,-7.876713 -2.892768,-14.3135614 10.253001,-31.50685 22.988792,-31.50685 z"
        id="ButtonHighlight"
-       style="fill:url(#linearGradient3113)" />
+       style="fill:url(#linearGradient3113)"
+       inkscape:connector-curvature="0" />
   </g>
 </svg>

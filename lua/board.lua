@@ -3,7 +3,7 @@ The logic for a flooding game where you need to navigate the mouse to the
 cheese by eating fruit.
 ]]
 
-require 'utils'
+require 'mylua'
 
 EMPTY = '_'
 MOUSE = 'M'
@@ -55,6 +55,43 @@ function Board:load(text)
     return obj
 end
 
+function Board:load_many(text)
+    local boards = {}
+    local this_text = ''
+    for line in text:gmatch("[^ \r\n]+") do
+        if line == 'Board(' then
+            -- pass
+        elseif line == ')' then
+            local loaded = Board:load(this_text)
+            table.insert(boards, loaded)
+        else
+            this_text = this_text .. '\n' .. line
+        end
+    end
+    return boards
+end
+
+function Board:copy()
+    local board = Board:new(self.width, self.height)
+    for i=1, self.width do
+        for j=1, self.height do
+            board[i][j] = self[i][j]
+        end
+    end
+    return board
+end
+
+local function save_boards(fname, boards)
+    local file = io.open(fname, "w")
+    for i, sp in ipairs(boards) do
+        io.stdout:write(sp[1] .. ' ')
+        local b = sp[2] -- {score, board}
+        file:write(tostring(b))
+        file:write('\n')
+    end
+    file:close()
+end
+
 function Board.mt:__tostring()
     local str = 'Board(\n'
     for i=1, self.height do
@@ -94,6 +131,12 @@ function Board:fill_random()
     end
 end
 
+function Board:standard_random()
+    self:fill_random()
+    self[1][1] = MOUSE
+    self[self.width][self.height] = CHEESE
+end
+
 function Board:adjacent(x, y)
     assert(x ~= nil)
     assert(y ~= nil)
@@ -129,10 +172,10 @@ function Board:is_legal(x, y)
     return false
 end
 
-function Board:mouse_pos()
+function Board:find_tile(what)
     for i=1, self.width do
         for j=1, self.height do
-            if self[i][j] == MOUSE then
+            if self[i][j] == what then
                 return i, j
             end
         end
@@ -183,7 +226,7 @@ function Board:eat(x, y)
     for _, loc in pairs(self:eat_locs(x, y)) do
         self[loc.x][loc.y] = EMPTY
     end
-    local mx, my = self:mouse_pos()
+    local mx, my = self:find_tile(MOUSE)
     self[mx][my] = EMPTY
     self[x][y] = MOUSE
 end
@@ -191,7 +234,7 @@ end
 function Board:eat2(x, y)
     assert(self:is_legal(x, y))
     what = self[x][y]
-    local mx, my = self:mouse_pos()
+    local mx, my = self:find_tile(MOUSE)
     self[mx][my] = EMPTY
     for i, pos in ipairs(self:legal_moves()) do
         if self[pos.x][pos.y] == what then
@@ -248,6 +291,41 @@ function Board:legal_moves()
     return legals
 end
 
+function Board:solve()
+    --local cheese_loc = self:find_tile(CHEESE)
+    --local mouse_loc = self:find_tile(MOUSE)
+    steps = {}
+    
+    for i=1, self.width do
+        steps[i] = {}
+        for j=1, self.height do
+            steps[i][j] = -1
+        end
+    end
+
+    --steps[cheese_loc.x][cheese_loc.y] = 0
+    i = 0
+    while self:has_cheese() do
+        --print(self)
+        local current_eat_locs = {}
+        for i, pos in ipairs(self:legal_moves(self:find_tile(MOUSE))) do
+            local eat_locs = self:eat_locs(pos.x, pos.y)
+            for _, loc in pairs(eat_locs) do
+                table.insert(current_eat_locs, loc)
+                steps[loc.x][loc.y] = i
+            end
+            -- manually, simaltaneously remove tiles to avoid convoluting eat steps
+        end
+        for _, loc in pairs(current_eat_locs) do
+            self[loc.x][loc.y] = EMPTY
+        end
+
+        i = i + 1
+    end
+
+    --print('solved in', i, 'steps')
+    return i
+end
 
 --[[MOAI is on lua5.1 that doesn't have `goto`
 function console_play()
@@ -281,14 +359,34 @@ function console_play()
     print(string.format('Game over in %d turns', turns))
 end]]
 
+function generate_levels()
+    local results = {}
+    local boards = {}
+    local board = Board:new(12, 6)
+    for i=1, 100 do
+        board:standard_random()
+        local copy = board:copy()
+        local steps = board:solve()
+        table.insert(results, steps)
+        table.insert(boards, {steps, copy})
+    end
+    function compare(a,b)
+        return a[1] < b[1]
+    end
+    table.sort(boards, compare)
+
+    require('stats')
+    save_boards('normal.txt', boards)
+    stats.print(results)
+
+end
+
 function test()
     print "main"
     local board = Board:new(6, 4)
     print(board)
 
-    board:fill_random()
-    board[1][1] = MOUSE
-    board[board.width][board.height] = CHEESE
+    board:standard_random()
     print(board)
 
     assert(board:is_legal(2,1))
@@ -332,11 +430,15 @@ function test()
     -- make sure eat_locs doesn't affect the board, a sad old bug
     -- moved the mouse :/
     assert(Board:load(board_s) == board)
+
+    assert(board:solve() == 1)
+    
 end
 
 if not package.loaded[...] then
     --main
     test()
     --console_play()
+    --generate_levels()
 else --module require
 end
