@@ -4,8 +4,25 @@ require 'level'
 
 local partition = nil
 local bgLayer = nil
+local mainMenu = nil
+state = {}
+
+function onBackButtonPressed ()
+	print ( "onBackButtonPressed: " )
+
+	-- Return true if you want to override the back button press and prevent the system from handling it.
+    if #state == 0 then
+    	return false
+    end
+    
+    mainMenu()
+    state = {}
+
+    return true
+end
 
 local function arcade()
+    table.insert(state, 'arcade')
     resetControl()
     Level:init()
 end
@@ -40,7 +57,7 @@ local function click(sx, sy)
     obj.action()
 end
 
-local function init()
+function mainMenu()
     local screenWidth = MOAIEnvironment.horizontalResolution
     local screenHeight = MOAIEnvironment.verticalResolution
     if screenWidth == nil then screenWidth = 800 end
@@ -50,7 +67,7 @@ local function init()
     local COLS = 14
 
     MOAISim.openWindow ("test", screenWidth, screenHeight)
-
+    
     local viewport = MOAIViewport.new ()
     viewport:setSize ( screenWidth, screenHeight )
     viewport:setScale ( COLS, ROWS )
@@ -81,6 +98,13 @@ local function init()
     --textBox('whatever', bgLayer, 2, 2, 10, 10)
 
     setupControl(mouseOver, click)
+
+end
+
+local function init()
+    MOAIApp.setListener ( MOAIApp.BACK_BUTTON_PRESSED, onBackButtonPressed )
+
+    mainMenu()
 end
 
 
