@@ -6,24 +6,29 @@ import platform
 import os
 
 #SDK = "C:/Users/yuv/Downloads/moai-sdk"
-SDK = open('sdk_location.txt').read().strip()
+#SDK = open('sdk_location.txt').read().strip()
+SDK = os.path.expandvars('$HOME/Downloads/moai-sdk')
 
 WINRUN = '/bin/win32/moai.exe'
 OSXRUN = '/bin/osx/moai'
+LINUXRUN = '/bin/linux/moai'
 
 SUFFIX = ' config.lua main.lua'
 
-if platform.system() == "Windows":
-    run = WINRUN
+system = platform.system()
+if system == "Windows":
+    run = SDK + WINRUN
+elif system == "Linux":
+    run = SDK + LINUXRUN
 else:
-    run = OSXRUN
+    run = SDK + OSXRUN
 
 
 os.chdir('host-chrome')
-subprocess.check_call('bash sdk-setup.sh', shell=True)
+subprocess.check_call('bash sdk-setup.sh ' + SDK, shell=True)
 
 os.chdir('build')
-line = SDK + run + SUFFIX
+line = run + SUFFIX
 print(line)
 subprocess.check_call(line, shell=True)
 

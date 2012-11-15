@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="Button"
+   version="1.1"
+   width="256"
+   height="256"
+   role="button"
+   onload="init()"
+   aria-pressed="false"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="back.svg"
+   inkscape:export-filename="/home/yuv/Dropbox/dev/github/omgcheese/images/buttonBack.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata28">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1301"
+     inkscape:window-height="744"
+     id="namedview26"
+     showgrid="false"
+     inkscape:zoom="2.4333333"
+     inkscape:cx="133.34155"
+     inkscape:cy="138.88479"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:showpageshadow="true"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <style
+     type="text/css"
+     id="style3">
+    rect[id=&quot;ButtonBase&quot;] { fill: red; }
+    svg[aria-pressed=&quot;true&quot;] rect[id=&quot;ButtonBase&quot;] { fill: green; }
+    g:hover {cursor: pointer; }
+    g:hover rect[id=&quot;ButtonGlow&quot;] {opacity: 0; }
+  </style>
+  <script
+     type="text/ecmascript"
+     id="script5">
+
+    var textOn = &quot;On&quot;;
+    var textOff = &quot;Off&quot;;
+
+    function init() {
+
+        <!-- Get color from style -->
+
+
+
+        var color = window.frameElement.style.color;
+	var ButtonBase  = document.getElementById(&quot;ButtonBase&quot;);
+        ButtonBase.style.fill=color;
+
+	<!-- Get text from params -->
+
+
+
+	for( var i = 0; i &lt; window.frameElement.childNodes.length; i++ ) {
+	  var node = window.frameElement.childNodes[ i ];
+	  if( node.nodeName == &quot;param&quot; ) {
+	    if( node.name == &quot;TextOn&quot; ) {
+	      textOn = node.value;
+	    }
+	    if( node.name == &quot;TextOff&quot; ) {
+	      textOff = node.value;
+            }
+	  }
+         }
+	var Text        = document.getElementById(&quot;Text&quot;);
+	var TextShadow  = document.getElementById(&quot;TextShadow&quot;);
+	Text.firstChild.nodeValue = textOff;
+	TextShadow.firstChild.nodeValue = textOff;
+
+	<!-- Set initial HTML text -->
+
+
+
+	var frameId = window.frameElement.id;
+	top.status(textOff, frameId);
+    }
+
+    function buttonEvent(event) {
+      if ((event.type == &quot;click&quot; &amp;&amp; event.button == 0) ||
+          (event.type == &quot;keydown&quot; &amp;&amp;
+	  (event.keyCode == 32 || event.keyCode ==13))) {
+
+	var SVGDocument = event.target.ownerDocument;
+	var SVGRoot     = SVGDocument.documentElement;
+	var Text        = SVGDocument.getElementById(&quot;Text&quot;);
+	var TextShadow  = SVGDocument.getElementById(&quot;TextShadow&quot;);
+
+        var pressed = false;
+	var text = textOff;
+
+        if (&quot;false&quot; == SVGRoot.getAttribute(&quot;aria-pressed&quot;)) {
+         pressed = true;
+	 text = textOn;
+        }
+
+        SVGRoot.setAttribute(&quot;aria-pressed&quot;, pressed);
+	Text.firstChild.nodeValue = text;
+	TextShadow.firstChild.nodeValue = text;
+
+	var frameId = window.frameElement.id;
+	top.status(text, frameId);
+
+      }
+    }
+  </script>
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3784">
+      <stop
+         id="stop3786"
+         offset="0"
+         style="stop-color:#ffff00;stop-opacity:1;" />
+      <stop
+         id="stop3788"
+         offset="1"
+         style="stop-color:#ff0000;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3776">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop3778" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0;"
+         offset="1"
+         id="stop3780" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3159">
+      <stop
+         id="stop3163"
+         style="stop-color:#000000;stop-opacity:0"
+         offset="0">
+        <animate
+           attributeName="stop-opacity"
+           values="0;0.5;0"
+           dur="2s"
+           repeatCount="indefinite"
+           id="animate10" />
+      </stop>
+      <stop
+         id="stop3161"
+         style="stop-color:#000000;stop-opacity:0.5"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3030">
+      <stop
+         id="stop3032"
+         style="stop-color:#ffffff;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop3034"
+         style="stop-color:#ffffff;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="120"
+       y1="10"
+       x2="120"
+       y2="50"
+       id="linearGradient3113"
+       xlink:href="#linearGradient3030"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.1494396,0,0,1.5753425,-9.9327505,-42.328767)" />
+    <radialGradient
+       cx="161.81506"
+       cy="175.34247"
+       r="100"
+       fx="161.81506"
+       fy="175.34247"
+       id="radialGradient3165"
+       xlink:href="#linearGradient3159"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0,-1.1457037,2.2988792,0,-262.80947,225.47945)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3784"
+       id="radialGradient3790"
+       cx="33.674374"
+       cy="61.247852"
+       fx="33.674374"
+       fy="61.247852"
+       r="72.739723"
+       gradientTransform="matrix(3.1169877,0.18146723,-0.07390051,1.6310553,-55.809664,-143.83208)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     id="layer1"
+     onkeydown="return buttonEvent(evt);"
+     onclick="return buttonEvent(evt);"
+     transform="translate(0,156)">
+    <path
+       style="fill:url(#radialGradient3790);fill-opacity:1;stroke:#001414;stroke-width:10;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="M 93.257684,-146.11841 7.6350134,-44.401718 115.17709,91.479369 75.448168,-5.5785512 246.00853,-0.919773 l 4.10988,-49.693651 -175.355223,-4.65878 z"
+       id="path3774"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccc" />
+  </g>
+</svg>

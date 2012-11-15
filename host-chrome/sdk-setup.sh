@@ -5,7 +5,7 @@
 # All Rights Reserved.
 # http://getmoai.com
 #================================================================#
-export MOAI_SDK=`cat ../sdk_location.txt`
+export MOAI_SDK=$1
 
 cp -rf ../lua/* ./build/
 cp -rf ../images/* ./build/

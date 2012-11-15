@@ -1,6 +1,7 @@
 
 require 'mymoai'
 require 'level'
+require 'selectlevel'
 
 local partition = nil
 local bgLayer = nil
@@ -28,7 +29,9 @@ local function arcade()
 end
 
 local function levels()
-    --print('levels')
+    table.insert(state, 'levels')
+    resetControl()
+    SelectLevel:init()
 end
 
 local buttons = {
@@ -42,6 +45,7 @@ local function mouseOver(sx, sy)
 end
 
 local function click(sx, sy)
+    print('click')
     local x, y = bgLayer:wndToWorld(sx, sy)
     local obj = partition:propForPoint(x, y)
     if obj == nil then
@@ -58,24 +62,9 @@ local function click(sx, sy)
 end
 
 function mainMenu()
-    local screenWidth = MOAIEnvironment.horizontalResolution
-    local screenHeight = MOAIEnvironment.verticalResolution
-    if screenWidth == nil then screenWidth = 800 end
-    if screenHeight == nil then screenHeight = 480 end
-
     local ROWS = 10
     local COLS = 14
-
-    MOAISim.openWindow ("test", screenWidth, screenHeight)
-    
-    local viewport = MOAIViewport.new ()
-    viewport:setSize ( screenWidth, screenHeight )
-    viewport:setScale ( COLS, ROWS )
-    viewport:setOffset(-1, -1) -- origin at bottom left
-
-    bgLayer = MOAILayer2D.new ()
-    bgLayer:setViewport ( viewport )
-    MOAISim.pushRenderPass ( bgLayer )
+    local viewport, bgLayer = setupViewport(COLS, ROWS, "test")
     
     partition = MOAIPartition.new()
     bgLayer:setPartition(partition)
@@ -84,7 +73,7 @@ function mainMenu()
     local buttonHeight = 3
     staticImage('bg.jpg', bgLayer, 0, 0, COLS, ROWS)
     staticImage('title.png', bgLayer, 0, 0, COLS - buttonWidth, ROWS)
-    
+
     for i, fname_action in ipairs(buttons) do
         local fname = fname_action[1]
         local action = fname_action[2]
@@ -93,19 +82,23 @@ function mainMenu()
         prop.action = action
         partition:insertProp(prop)
     end
-    --bgLayer:setPartition(partition)
 
-    --textBox('whatever', bgLayer, 2, 2, 10, 10)
+    textBox('whatever', bgLayer, 2, 2, 10, 10)
 
     setupControl(mouseOver, click)
-
+    --mouseThread()
 end
 
 local function init()
-    MOAIApp.setListener ( MOAIApp.BACK_BUTTON_PRESSED, onBackButtonPressed )
+    if MOAIApp ~= nil then
+        -- android
+        MOAIApp.setListener ( MOAIApp.BACK_BUTTON_PRESSED, onBackButtonPressed )
+    end
 
     mainMenu()
 end
 
 
-init()
+--init()
+--arcade()
+levels()
