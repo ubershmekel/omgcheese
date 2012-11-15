@@ -64,6 +64,7 @@ function Board:load_many(text)
         elseif line == ')' then
             local loaded = Board:load(this_text)
             table.insert(boards, loaded)
+            this_text = ''
         else
             this_text = this_text .. '\n' .. line
         end
