@@ -108,11 +108,15 @@ function drawBoard()
     end
 end
 
-function initBoard()
-    board = Board:new(COLS, ROWS)
-    board:fill_random()
-    board[1][1] = MOUSE
-    board[COLS][ROWS] = CHEESE
+function initBoard(map)
+    if map == nil then
+        board = Board:new(COLS, ROWS)
+        board:fill_random()
+        board[1][1] = MOUSE
+        board[COLS][ROWS] = CHEESE
+    else
+        board = map:copy()
+    end
     drawBoard()
 end
 
@@ -197,7 +201,7 @@ local function click(sx, sy)
 end
 
 
-function Level:init()
+function Level:init(map)
     --MOAISim.openWindow ( "test", WIDTH, HEIGHT )
     --moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
     MOAISim.openWindow ("test", screenWidth, screenHeight)
@@ -234,7 +238,7 @@ function Level:init()
     fgLayer:insertProp(hoverProp)
 
     setBackground()
-    initBoard()
+    initBoard(map)
     setupControl(mouseOver, click)
 end
 

@@ -10,8 +10,32 @@ SelectLevel = {}
 
 local layer = nil
 local viewport = nil
+local gridProp = nil
+local grid = nil
+local boards = nil
 
-local function click(wx, wy)
+
+local wx, wy = 10, 10
+
+local function tileToIndex(i, j)
+    return (j - 1) * wx + i
+end
+
+local function click(wix, wiy)
+    local wox, woy = layer:wndToWorld ( wix, wiy ) 
+    local mx, my = gridProp:worldToModel ( wox, woy ) 
+    local x, y = grid:locToCoord ( mx, my ) 
+    if x < 1 or x > wx or y < 1 or y > wy then
+        return
+    end
+    local index = tileToIndex(x, y)
+    print('level ' .. index)
+    print(boards[index])
+    
+    states[#states + 1] = SelectLevel.init
+    Level:init(boards[index])
+    --print(x, y, mx, my, wox, woy)
+    --print(tileToIndex(x, y), tileToIndex(mx, my))
 end
 
 local function mouseOver(wx, wy)
@@ -21,6 +45,10 @@ function SelectLevel:init()
     local ROWS = 480
     local COLS = 640
     viewport, layer = setupViewport(COLS, ROWS, "world")
+    
+    if boards == nil then
+        boards = SelectLevel:load()
+    end
     
     --partition = MOAIPartition.new()
     --layer:setPartition(partition)
@@ -32,11 +60,11 @@ function SelectLevel:init()
     setupControl(mouseOver, click)
 end
 
+
 function SelectLevel:setupGrid()
-    local grid = MOAIGrid.new()
+    grid = MOAIGrid.new()
     local deck = MOAITileDeck2D.new()
 
-    local wx, wy = 10, 10
     local tileSize = 40
     grid:initRectGrid(wx, wy, tileSize, tileSize)
     deck:setTexture("button.png")
@@ -51,12 +79,12 @@ function SelectLevel:setupGrid()
         end
     end
 
-    prop = MOAIProp2D.new()
-    prop:setDeck(deck)
-    prop:setGrid(grid)
-    prop:setLoc(10, 10)
+    gridProp = MOAIProp2D.new()
+    gridProp:setDeck(deck)
+    gridProp:setGrid(grid)
+    gridProp:setLoc(10, 10)
 
-    layer:insertProp(prop)
+    layer:insertProp(gridProp)
 
     --textBox("123", layer, 20, 20, 30, 300)
 
@@ -64,18 +92,17 @@ function SelectLevel:setupGrid()
         for j=1, wy do
             --local tx, ty = grid:cellAddrToCoord(i, j)
             local tx, ty = grid:getTileLoc(i, j)
-            local x, y = prop:modelToWorld(tx, ty)
+            local x, y = gridProp:modelToWorld(tx, ty)
             --local x, y = layer:worldToWnd(mx, my)
             --print(mx, my)
-            textBox("".. (i - 1) * wx + j, layer, x , y, x + tileSize / 2, y + tileSize / 2)
+            textBox("".. tileToIndex(i, j), layer, x , y, x + tileSize / 2, y + tileSize / 2)
         end
     end
-    
-    local boards = SelectLevel:load()
 end
 
 function SelectLevel:load()
-    local text = io.open('levelsNormal.txt'):read()
-    
-    return Board:load_many(text)
+    local text = io.open('levelsNormal.txt'):read("*all")
+    local boards = Board:load_many(text)
+    print('loaded ' .. #boards .. ' boards from ' .. #text )
+    return boards
 end

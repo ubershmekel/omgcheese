@@ -6,30 +6,30 @@ require 'selectlevel'
 local partition = nil
 local bgLayer = nil
 local mainMenu = nil
-state = {}
+states = {}
 
 function onBackButtonPressed ()
 	print ( "onBackButtonPressed: " )
 
-	-- Return true if you want to override the back button press and prevent the system from handling it.
-    if #state == 0 then
+    if #states == 0 then
     	return false
     end
     
-    mainMenu()
-    state = {}
+    local callback = table.remove(states, #states)
+    callback()
 
+	-- Return true if you want to override the back button press and prevent the system from handling it.
     return true
 end
 
 local function arcade()
-    table.insert(state, 'arcade')
+    table.insert(states, mainMenu)
     resetControl()
     Level:init()
 end
 
 local function levels()
-    table.insert(state, 'levels')
+    table.insert(states, mainMenu)
     resetControl()
     SelectLevel:init()
 end
@@ -64,7 +64,7 @@ end
 function mainMenu()
     local ROWS = 10
     local COLS = 14
-    local viewport, bgLayer = setupViewport(COLS, ROWS, "test")
+    viewport, bgLayer = setupViewport(COLS, ROWS, "test")
     
     partition = MOAIPartition.new()
     bgLayer:setPartition(partition)
@@ -94,11 +94,10 @@ local function init()
         -- android
         MOAIApp.setListener ( MOAIApp.BACK_BUTTON_PRESSED, onBackButtonPressed )
     end
-
-    mainMenu()
 end
 
 
---init()
+init()
+--mainMenu()
 --arcade()
 levels()
