@@ -30,7 +30,10 @@ subprocess.check_call('bash sdk-setup.sh ' + SDK, shell=True)
 os.chdir('build')
 line = run + SUFFIX
 print(line)
-subprocess.check_call(line, shell=True)
+try:
+    subprocess.check_call(line, shell=True)
+except KeyboardInterrupt:
+    pass
 
 #print('--- press enter ---')
 #sys.stdin.readline()
