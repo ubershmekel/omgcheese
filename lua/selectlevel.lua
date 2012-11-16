@@ -16,6 +16,7 @@ local boards = nil
 
 
 local wx, wy = 10, 10
+local tileSize = 50
 
 local function tileToIndex(i, j)
     return (j - 1) * wx + i
@@ -44,7 +45,8 @@ end
 function SelectLevel:init()
     local ROWS = 480
     local COLS = 640
-    viewport, layer = setupViewport(COLS, ROWS, "world")
+    viewport = setupViewport(COLS, ROWS, "world")
+    layer = newLayer(viewport)
     
     if boards == nil then
         boards = SelectLevel:load()
@@ -65,7 +67,6 @@ function SelectLevel:setupGrid()
     grid = MOAIGrid.new()
     local deck = MOAITileDeck2D.new()
 
-    local tileSize = 40
     grid:initRectGrid(wx, wy, tileSize, tileSize)
     deck:setTexture("button.png")
     deck:setSize(1, 1)

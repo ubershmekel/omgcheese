@@ -90,24 +90,51 @@ function setupControl(mouseOver, click)
     end
 end
 
+local windowSetup = false
 function setupViewport(gridx, gridy, name)
     local screenWidth = MOAIEnvironment.horizontalResolution
     local screenHeight = MOAIEnvironment.verticalResolution
     if screenWidth == nil then screenWidth = 800 end
     if screenHeight == nil then screenHeight = 480 end
 
-    MOAISim.openWindow (name, screenWidth, screenHeight)
+    if not windowSetup then
+        MOAISim.openWindow (name, screenWidth, screenHeight)
+        windowSetup = true
+        viewport = MOAIViewport.new ()
+        viewport:setSize ( screenWidth, screenHeight )
+    end
     
-    local viewport = MOAIViewport.new ()
-    viewport:setSize ( screenWidth, screenHeight )
     viewport:setScale ( gridx, gridy )
     viewport:setOffset(-1, -1) -- origin at bottom left
 
+    return viewport
+end
+
+function newLayer(state)
+    assert(viewport ~= nil)
+    assert(state ~= nil)
     local layer = MOAILayer2D.new ()
     layer:setViewport ( viewport )
-    MOAISim.pushRenderPass ( layer )
+    --MOAISim.pushRenderPass ( layer )
+    
+    -- The state-manager has a set of layers for whichever place
+    -- this state is on the stack. E.g. if a popup is in the foreground
+    -- then state.layerTable[2] can have an additional greying-out layer.
+    if state.layerTable == nil then
+        state.layerTable = {{}}
+    end
+    table.insert(state.layerTable[1], layer)
+    print('new',layer)
+    return layer
+end
 
-    return viewport, layer
+function clearLayers()
+	MOAIRenderMgr.clearRenderStack ()
+	MOAISim.forceGarbageCollection ()
+	
+    for i, layer in ipairs(layers) do
+        layer:clear()
+    end
 end
 
 --[[function mouseThread()

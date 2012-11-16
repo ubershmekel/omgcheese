@@ -4,11 +4,6 @@ require 'particle'
 
 Level = {}
 
-local screenWidth = MOAIEnvironment.horizontalResolution
-local screenHeight = MOAIEnvironment.verticalResolution
-if screenWidth == nil then screenWidth = 800 end
-if screenHeight == nil then screenHeight = 480 end
-
 local ROWS = 6
 local COLS = 12
 
@@ -204,33 +199,26 @@ end
 function Level:init(map)
     --MOAISim.openWindow ( "test", WIDTH, HEIGHT )
     --moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
-    MOAISim.openWindow ("test", screenWidth, screenHeight)
+    --[[MOAISim.openWindow ("test", screenWidth, screenHeight)
 
     viewport = MOAIViewport.new ()
     viewport:setSize ( screenWidth, screenHeight )
-    viewport:setScale ( COLS, -ROWS )
+    viewport:setScale ( COLS, -ROWS )]]
+
+    clearLayers()
+    viewport = setupViewport(COLS, -ROWS, "test")
     --viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
     viewport:setOffset(-1, 1) -- origin at top left
 
-    bgLayer = MOAILayer2D.new ()
-    bgLayer:setViewport ( viewport )
-    MOAISim.pushRenderPass ( bgLayer )
+    bgLayer = newLayer(viewport)
 
-    highlightsLayer = MOAILayer2D.new ()
-    highlightsLayer:setViewport ( viewport )
-    MOAISim.pushRenderPass ( highlightsLayer )
+    highlightsLayer = newLayer(viewport)
 
-    targetsLayer = MOAILayer2D.new ()
-    targetsLayer:setViewport ( viewport )
-    MOAISim.pushRenderPass ( targetsLayer )
+    targetsLayer = newLayer(viewport)
 
-    tilesLayer = MOAILayer2D.new ()
-    tilesLayer:setViewport ( viewport )
-    MOAISim.pushRenderPass ( tilesLayer )
+    tilesLayer = newLayer(viewport)
 
-    fgLayer = MOAILayer2D.new ()
-    fgLayer:setViewport ( viewport )
-    MOAISim.pushRenderPass ( fgLayer )
+    fgLayer = newLayer(viewport)
     
     hoverProp = MOAIProp2D.new ()
     hoverProp:setDeck ( gfx[MOUSE] )
