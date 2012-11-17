@@ -1,15 +1,14 @@
-require 'board'
-require 'level'
+require 'Board'
 require 'mymoai'
+require 'inputmgr'
 
 --MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX, 1, 1, 1, 1, 1 )
 --MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX_LAYOUT, 1, 0, 0, 1, 1 )
 --MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX_BASELINES, 1, 1, 0, 0, 1 )
 
-SelectLevel = {}
+StateSelectLevel = {}
 
 local layer = nil
-local viewport = nil
 local gridProp = nil
 local grid = nil
 local boards = nil
@@ -33,8 +32,8 @@ local function click(wix, wiy)
     print('level ' .. index)
     print(boards[index])
     
-    states[#states + 1] = SelectLevel.init
-    Level:init(boards[index])
+    statemgr.push('StateLevel.lua', boards[index])
+    --Level:init(boards[index])
     --print(x, y, mx, my, wox, woy)
     --print(tileToIndex(x, y), tileToIndex(mx, my))
 end
@@ -42,28 +41,15 @@ end
 local function mouseOver(wx, wy)
 end
 
-function SelectLevel:init()
-    local ROWS = 480
-    local COLS = 640
-    viewport = setupViewport(COLS, ROWS, "world")
-    layer = newLayer(viewport)
-    
-    if boards == nil then
-        boards = SelectLevel:load()
-    end
-    
-    --partition = MOAIPartition.new()
-    --layer:setPartition(partition)
-    
-    staticImage('bg.jpg', layer, 0, 0, COLS, ROWS)
-    
-    SelectLevel:setupGrid()
-
-    setupControl(mouseOver, click)
+StateSelectLevel.onInput = function ( self )
+	if inputmgr:up () then
+		click ( inputmgr:getTouch ())		
+	elseif inputmgr:down () then
+		mouseOver( inputmgr:getTouch ())
+	end
 end
 
-
-function SelectLevel:setupGrid()
+function StateSelectLevel:setupGrid()
     grid = MOAIGrid.new()
     local deck = MOAITileDeck2D.new()
 
@@ -101,9 +87,36 @@ function SelectLevel:setupGrid()
     end
 end
 
-function SelectLevel:load()
+function StateSelectLevel:loadLevels()
     local text = io.open('levelsNormal.txt'):read("*all")
     local boards = Board:load_many(text)
     print('loaded ' .. #boards .. ' boards from ' .. #text )
     return boards
 end
+
+function StateSelectLevel:onLoad()
+    local ROWS = 480
+    local COLS = 640
+	viewport = MOAIViewport.new ()
+	viewport:setSize ( screenWidth, screenHeight )
+    viewport:setScale ( COLS, ROWS )
+    viewport:setOffset(-1, -1) -- origin at top left
+    --viewport = setupViewport(COLS, ROWS, "world")
+    layer = newLayer(self)
+    
+    if boards == nil then
+        boards = self:loadLevels()
+    end
+    
+    --partition = MOAIPartition.new()
+    --layer:setPartition(partition)
+    
+    staticImage('bg.jpg', layer, 0, 0, COLS, ROWS)
+    
+    self:setupGrid()
+
+    --setupControl(mouseOver, click)
+end
+
+
+return StateSelectLevel

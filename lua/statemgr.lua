@@ -56,7 +56,6 @@ local function addStateLayers ( state, stackLoc )
 	if state.layerTable [ stackPos ] then
 		
 		for j, layer in ipairs ( state.layerTable [ stackPos ] ) do
-		    print(layer)
 			MOAIRenderMgr.pushRenderPass ( layer )
 		end
 	end	
@@ -70,7 +69,6 @@ local function rebuildRenderStack ( )
 	MOAISim.forceGarbageCollection ()
 	
 	for i, state in ipairs ( stateStack ) do
-		
 		addStateLayers ( state, i )
 	end
 	
@@ -109,6 +107,17 @@ function makePopup ( state )
 	state.IS_POPUP = true
 end
 
+function stackSize( )
+	return #stateStack
+end
+----------------------------------------------------------------
+local function clearState(state)
+    for i, layerset in ipairs(state.layerTable) do
+        for j, layer in ipairs(layerset) do
+            layer:clear()
+        end
+    end
+end
 ----------------------------------------------------------------
 function pop ( )
 	
@@ -122,6 +131,8 @@ function pop ( )
 		curState:onUnload ()
 	end
 	
+    clearState(stateStack[#stateStack])
+    
 	curState = nil
 	table.remove ( stateStack, #stateStack )	
 	curState = stateStack [ #stateStack ]
@@ -162,10 +173,8 @@ function push ( stateFile, ... )
 	end
 		
 	if curState.IS_POPUP then
-print('addstate')
 		addStateLayers ( curState, #stateStack )
 	else
-	print('rebuild')
 		rebuildRenderStack ()
 	end
 end

@@ -1,13 +1,9 @@
+require 'inputmgr'
 
 local StateMenu = {}
 
 local partition = nil
 local bgLayer = nil
-
-local buttons = {
-    {'buttonArcade.png', arcade},
-    {'buttonLevels.png', levels}
-    }
 
 local function arcade()
     statemgr.push('StateLevel.lua')
@@ -16,6 +12,11 @@ end
 local function levels()
     statemgr.push('StateSelectLevel.lua')
 end
+
+local buttons = {
+    {'buttonArcade.png', arcade},
+    {'buttonLevels.png', levels}
+    }
 
 local function mouseOver(sx, sy)
     --print('mouseOver')
@@ -26,24 +27,37 @@ local function click(sx, sy)
     local x, y = bgLayer:wndToWorld(sx, sy)
     local obj = partition:propForPoint(x, y)
     if obj == nil then
+    	print('click no obj')
         return
     end
     
     if obj.action == nil then
-        print('click', nil)
+        print('click o', nil)
         return
     end
     
-    print('click', obj.name)
+    print('click n', obj.name)
     obj.action()
+end
+
+StateMenu.onInput = function ( self )
+	if inputmgr:up () then
+		click ( inputmgr:getTouch ())		
+	elseif inputmgr:down () then
+		mouseOver( inputmgr:getTouch ())
+	end
 end
 
 function StateMenu:onLoad()
     local ROWS = 10
     local COLS = 14
 
-    viewport:setScale ( COLS, ROWS )
-    viewport:setOffset(-1, -1) -- origin at bottom left
+    if self.viewport == nil then
+	    self.viewport = MOAIViewport.new ()
+    	self.viewport:setSize ( screenWidth, screenHeight )
+        self.viewport:setScale ( COLS, ROWS )
+        self.viewport:setOffset(-1, -1) -- origin at bottom left
+    end
 
     bgLayer = newLayer(self)
     
@@ -66,7 +80,7 @@ function StateMenu:onLoad()
 
     --textBox('whatever', bgLayer, 2, 2, 10, 10)
 
-    setupControl(mouseOver, click)
+    --setupControl(mouseOver, click)
     --mouseThread()
     --print(table.tostring(StateMenu))
 end

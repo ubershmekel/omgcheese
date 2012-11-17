@@ -7,10 +7,14 @@ function wait ( action )
 end
 
 
-
+local cache = {}
 function staticImage(fname, layer, minX, minY, maxX, maxY)
-    local gfx = MOAIGfxQuad2D.new()
-    gfx:setTexture(fname)
+    local gfx = cache[fname]
+    if gfx == nil then
+        gfx = MOAIGfxQuad2D.new()
+        gfx:setTexture(fname)
+        cache[fname] = gfx
+    end
     gfx:setRect(minX, minY, maxX, maxY)
     --gfx:setUVRect ( 0, 0, 1, 1 )
     local prop = MOAIProp2D.new ()
@@ -114,7 +118,7 @@ function newLayer(state)
     assert(viewport ~= nil)
     assert(state ~= nil)
     local layer = MOAILayer2D.new ()
-    layer:setViewport ( viewport )
+    layer:setViewport ( state.viewport )
     --MOAISim.pushRenderPass ( layer )
     
     -- The state-manager has a set of layers for whichever place
@@ -124,7 +128,7 @@ function newLayer(state)
         state.layerTable = {{}}
     end
     table.insert(state.layerTable[1], layer)
-    print('new',layer)
+
     return layer
 end
 

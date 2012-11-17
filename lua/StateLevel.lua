@@ -1,8 +1,9 @@
 require 'mymoai'
-require 'board'
+require 'Board'
 require 'particle'
+require 'inputmgr'
 
-Level = {}
+StateLevel = {}
 
 local ROWS = 6
 local COLS = 12
@@ -12,11 +13,22 @@ local targetsLayer = nil
 local tilesLayer = nil
 local fgLayer = nil
 
+local board = nil
+
+local mouseProp = nil
+local tiles = nil
+
+local cache = {}
+
 local function getGfx(fname)
+    if cache[fname] ~= nil then
+        return cache[fname]
+    end
     local quad = MOAIGfxQuad2D.new()
     quad:setTexture (fname)
     quad:setRect (-1, -1, 0, 0)
     quad:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
+    cache[fname] = quad
     return quad
 end
 
@@ -51,13 +63,14 @@ for id, fname in pairs(resources) do
 end
 
 function setBackground()
-    bgGfx = MOAIGfxQuad2D.new()
-    bgGfx:setTexture('bg.jpg')
-    bgGfx:setRect (-1, -1, COLS - 1, ROWS - 1)
+    --bgGfx = MOAIGfxQuad2D.new()
+    --bgGfx:setTexture('bg.jpg')
+    local bgProp, bgGfx = staticImage('bg.jpg', bgLayer, -1, -1, COLS - 1, ROWS - 1)
+    --bgGfx:setRect (-1, -1, COLS - 1, ROWS - 1)
     bgGfx:setUVRect ( 0, 0, 1, 1 )
-    bgProp = MOAIProp2D.new ()
-    bgProp:setDeck(bgGfx)
-    bgLayer:insertProp (bgProp)
+    --bgProp = MOAIProp2D.new ()
+    --bgProp:setDeck(bgGfx)
+    --bgLayer:insertProp (bgProp)
     bgProp:setLoc(1, 1)
 end
 
@@ -70,9 +83,6 @@ prop:setLoc(1.7, 1.7)
 layer:insertProp ( prop )
 prop:moveRot ( 360, 1.5 )]]
 
-local board = nil
-local mouseProp = nil
-local tiles = nil
 function drawBoard()
     tiles = {}
     tilesLayer:clear()
@@ -83,13 +93,17 @@ function drawBoard()
         col = {}
         table.insert(tiles, col)
         for y=1, ROWS do
-            local tileProp = MOAIProp2D.new ()
+            --local tileProp = MOAIProp2D.new ()
             local what = board[x][y]
-            tileProp:setDeck ( gfx[what] )
-            tileProp:setLoc(x, y)
-            tilesLayer:insertProp (tileProp)
+            --tileProp:setDeck ( gfx[what] )
+            --tileProp:setLoc(x, y)
+            --tilesLayer:insertProp (tileProp)
+            --tiles[x][y] = tileProp
+            local tileProp, quad = staticImage(resources[what], tilesLayer, -1, -1, 0, 0)
+            quad:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
             tiles[x][y] = tileProp
-            
+            tileProp:setLoc(x, y)
+
             if what == MOUSE then
                 mouseProp = tileProp
             end
@@ -134,15 +148,19 @@ local function highlightTargets(x, y)
     recentHighlightY = y
 end
 
-local function endGame()
+function StateLevel:endGame()
     mouseProp:seekLoc(COLS / 2, ROWS / 2, 1)
     mouseProp:moveRot(360, 2)
     wait(mouseProp:seekScl(3, 3, 3))
-    initBoard()
+    if self.isArcade then
+        initBoard()
+    else
+        statemgr.pop()
+    end
 end
 
 
-local function animateEat(x, y)
+function StateLevel:animateEat(x, y)
     targetsLayer:clear()
     highlightsLayer:clear()
     mouseProp:setVisible(true)
@@ -156,10 +174,9 @@ local function animateEat(x, y)
         drawBoard()
 
         if not board:has_cheese() then
-            endGame()
+            self:endGame()
         end
     end
-    
     local thread = MOAIThread.new ()
     thread:run ( threadAnim )
 end
@@ -184,19 +201,27 @@ local function mouseOver(sx, sy)
 end
 
 local function click(sx, sy)
-    x, y = tilesLayer:wndToWorld(sx, sy)
-    x, y = math.ceil(x), math.ceil(y)
+    local wox, woy = tilesLayer:wndToWorld(sx, sy)
+    local x, y = math.ceil(wox), math.ceil(woy)
+    --print(sx, sy, wox, woy, x, y)
     hoverProp:setVisible(false)
     if board:is_legal(x, y) then
         --board:eat(x, y)
         --particle:go(fgLayer, 2,2,3,3)
         --drawBoard()
-        animateEat(x, y)
+        StateLevel:animateEat(x, y)
     end
 end
 
+StateLevel.onInput = function ( self )
+	if inputmgr:up () then
+		click ( inputmgr:getTouch ())		
+	elseif inputmgr:down () then
+		mouseOver( inputmgr:getTouch ())
+	end
+end
 
-function Level:init(map)
+function StateLevel:onLoad(map)
     --MOAISim.openWindow ( "test", WIDTH, HEIGHT )
     --moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
     --[[MOAISim.openWindow ("test", screenWidth, screenHeight)
@@ -205,20 +230,24 @@ function Level:init(map)
     viewport:setSize ( screenWidth, screenHeight )
     viewport:setScale ( COLS, -ROWS )]]
 
-    clearLayers()
-    viewport = setupViewport(COLS, -ROWS, "test")
+    --clearLayers()
+    --viewport = setupViewport(COLS, -ROWS, "test")
     --viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
-    viewport:setOffset(-1, 1) -- origin at top left
+    if self.viewport == nil then
+	    self.viewport = MOAIViewport.new ()
+	    self.viewport:setSize ( screenWidth, screenHeight )
+        self.viewport:setScale ( COLS, -ROWS )
+        self.viewport:setOffset(-1, 1) -- origin at top left
+    end
+    bgLayer = newLayer(self)
 
-    bgLayer = newLayer(viewport)
+    highlightsLayer = newLayer(self)
 
-    highlightsLayer = newLayer(viewport)
+    targetsLayer = newLayer(self)
 
-    targetsLayer = newLayer(viewport)
+    tilesLayer = newLayer(self)
 
-    tilesLayer = newLayer(viewport)
-
-    fgLayer = newLayer(viewport)
+    fgLayer = newLayer(self)
     
     hoverProp = MOAIProp2D.new ()
     hoverProp:setDeck ( gfx[MOUSE] )
@@ -226,7 +255,14 @@ function Level:init(map)
     fgLayer:insertProp(hoverProp)
 
     setBackground()
+    
+    if map == nil then
+        self.isArcade = true
+    else
+        self.isArcade = false
+    end
     initBoard(map)
-    setupControl(mouseOver, click)
+    --setupControl(mouseOver, click)
 end
 
+return StateLevel
