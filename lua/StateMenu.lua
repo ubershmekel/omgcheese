@@ -9,6 +9,13 @@ local buttons = {
     {'buttonLevels.png', levels}
     }
 
+local function arcade()
+    statemgr.push('StateLevel.lua')
+end
+
+local function levels()
+    statemgr.push('StateSelectLevel.lua')
+end
 
 local function mouseOver(sx, sy)
     --print('mouseOver')
@@ -35,7 +42,7 @@ function StateMenu:onLoad()
     local ROWS = 10
     local COLS = 14
 
-    viewport:setScale ( ROWS, COLS )
+    viewport:setScale ( COLS, ROWS )
     viewport:setOffset(-1, -1) -- origin at bottom left
 
     bgLayer = newLayer(self)

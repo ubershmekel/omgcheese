@@ -1,9 +1,6 @@
 
 require 'mymoai'
-require 'level'
-require 'selectlevel'
-require 'StateMenu'
-require 'state-manager'
+require 'statemgr'
 
 function onBackButtonPressed ()
 	print ( "onBackButtonPressed: " )
@@ -19,21 +16,6 @@ function onBackButtonPressed ()
     return true
 end
 
-local function arcade()
-    table.insert(states, mainMenu)
-    resetControl()
-    Level:init()
-end
-
-local function levels()
-    table.insert(states, mainMenu)
-    resetControl()
-    SelectLevel:init()
-end
-
-local function title()
-    table.insert(states, mainMenu)
-end
 
 local function init()
     if MOAIApp ~= nil then
@@ -49,10 +31,13 @@ if screenHeight == nil then screenHeight = 480 end
 
 MOAISim.openWindow ("test", screenWidth, screenHeight)
 viewport = MOAIViewport.new ()
+viewport:setSize ( screenWidth, screenHeight )
 
+--viewport:setScale ( 640, 480 )
 --viewport = setupViewport(COLS, ROWS, "test")
 
-statemgr.push ( "StateMenu.lua" )	
+statemgr.push ( "StateMenu.lua" )
+--statemgr.push ( "statesimple.lua" )
 statemgr.begin()
 
 --init()

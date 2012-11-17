@@ -65,9 +65,9 @@ end
 ----------------------------------------------------------------
 local function rebuildRenderStack ( )
 	
-	--MOAIRenderMgr.clearRenderStack ()
+	MOAIRenderMgr.clearRenderStack ()
 	
-	--MOAISim.forceGarbageCollection ()
+	MOAISim.forceGarbageCollection ()
 	
 	for i, state in ipairs ( stateStack ) do
 		
