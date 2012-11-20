@@ -20,6 +20,7 @@ local gridProp = nil
 local mouseProp = nil
 local tiles = nil
 
+local barHeight = Env.wy / 10
 
 local function getGfx(fname, layer)
     local prop, quad = staticImage(fname, layer, -1, -1, 0, 0)
@@ -131,6 +132,8 @@ function StateLevel:initBoard(map)
     else
         board = map:copy()
     end
+    self.turns = 0
+    self.minTurns = board:copy():solve()
     --drawBoard()
 end
 
@@ -207,19 +210,26 @@ function StateLevel:mouseOver(sx, sy)
     end
 end
 
+--local barSections = {"turns", "target", "back"}
+
+function StateLevel:refreshHUD()
+    self.turnsText:setString(self.turns .. "/".. self.minTurns .. " turns")
+    --self.targetTurnsText:setString('' .. )
+end
+
 function StateLevel:refreshGrid()
     for i=1, board.width do
         for j=1, board.height do
             grid:setTile(i, j, tilemap[board[i][j]])
         end
     end
+    self:refreshHUD()
 end
 
 function StateLevel:setupGrid()
     grid = MOAIGrid.new()
     local deck = MOAITileDeck2D.new()
 
-    local barHeight = Env.wy / 10
     local padding = 10
     local tileHeight = (Env.wy - padding - barHeight) / board.height
     local tileWidth = (Env.wx - 2 * padding) / board.width
@@ -265,6 +275,7 @@ function StateLevel:click(wix, wiy)
     hoverProp:setVisible(false)
 
     if board:is_legal(x, y) then
+        self.turns = self.turns + 1
         board:eat(x, y)
         --particle:go(fgLayer, 2,2,3,3)
         --drawBoard()
@@ -303,14 +314,11 @@ function StateLevel:onLoad(map)
         self.viewport:setScale ( COLS, -ROWS )
         self.viewport:setOffset(-1, 1) -- origin at top left
     end]]
+
     bgLayer = newLayer(self)
-
     highlightsLayer = newLayer(self)
-
     targetsLayer = newLayer(self)
-
     tilesLayer = newLayer(self)
-
     fgLayer = newLayer(self)
     
     hoverProp, quad = getGfx(resources[MOUSE], fgLayer)
@@ -320,6 +328,10 @@ function StateLevel:onLoad(map)
 
     --setBackground()
     staticImage('bg.jpg', bgLayer, 0, 0, Env.wx, Env.wy)
+
+    local width = Env.wx / 3
+    self.turnsText = textBox("Turns", fgLayer, 0, Env.wy - barHeight, width, Env.wy)
+    self.turnsText:setTextSize(24)
     
     if map == nil then
         self.isArcade = true

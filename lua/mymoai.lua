@@ -49,6 +49,7 @@ function textBox(text, layer, minX, minY, maxX, maxY)
     textbox:setString ( text )
     layer:insertProp ( textbox )
     --textbox:spool ()
+    return textbox
 end
 
 
