@@ -49,30 +49,30 @@ StateMenu.onInput = function ( self )
 end
 
 function StateMenu:onLoad()
-    local ROWS = 10
-    local COLS = 14
+    --local ROWS = 10
+    --local COLS = 14
 
-    if self.viewport == nil then
+    --[[if self.viewport == nil then
 	    self.viewport = MOAIViewport.new ()
     	self.viewport:setSize ( screenWidth, screenHeight )
         self.viewport:setScale ( COLS, ROWS )
         self.viewport:setOffset(-1, -1) -- origin at bottom left
-    end
+    end]]
 
     bgLayer = newLayer(self)
     
     partition = MOAIPartition.new()
     bgLayer:setPartition(partition)
     
-    local buttonWidth = 4
-    local buttonHeight = 3
-    staticImage('bg.jpg', bgLayer, 0, 0, COLS, ROWS)
-    staticImage('title.png', bgLayer, 0, 0, COLS - buttonWidth, ROWS)
+    local buttonWidth = Env.wx / 4
+    local buttonHeight = Env.wy / 4
+    staticImage('bg.jpg', bgLayer, 0, 0, Env.wx, Env.wy)
+    staticImage('title.png', bgLayer, 0, 0, Env.wx - buttonWidth, Env.wy)
 
     for i, fname_action in ipairs(buttons) do
         local fname = fname_action[1]
         local action = fname_action[2]
-        local prop, gfx = staticImage(fname, bgLayer, COLS - buttonWidth, ROWS - i * buttonHeight, COLS, ROWS - (i - 1) * buttonHeight)
+        local prop, gfx = staticImage(fname, bgLayer, Env.wx - buttonWidth, Env.wy - i * buttonHeight, Env.wx, Env.wy - (i - 1) * buttonHeight)
         prop.name = fname
         prop.action = action
         partition:insertProp(prop)

@@ -95,12 +95,10 @@ function StateSelectLevel:loadLevels()
 end
 
 function StateSelectLevel:onLoad()
-    local ROWS = 480
-    local COLS = 640
-	viewport = MOAIViewport.new ()
+	--[[viewport = MOAIViewport.new ()
 	viewport:setSize ( screenWidth, screenHeight )
     viewport:setScale ( COLS, ROWS )
-    viewport:setOffset(-1, -1) -- origin at top left
+    viewport:setOffset(-1, -1) -- origin at top left]]
     --viewport = setupViewport(COLS, ROWS, "world")
     layer = newLayer(self)
     
@@ -111,7 +109,7 @@ function StateSelectLevel:onLoad()
     --partition = MOAIPartition.new()
     --layer:setPartition(partition)
     
-    staticImage('bg.jpg', layer, 0, 0, COLS, ROWS)
+    staticImage('bg.jpg', layer, 0, 0, Env.wx, Env.wy)
     
     self:setupGrid()
 

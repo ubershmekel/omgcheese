@@ -23,11 +23,16 @@ screenHeight = MOAIEnvironment.verticalResolution
 if screenWidth == nil then screenWidth = 800 end
 if screenHeight == nil then screenHeight = 480 end
 
+Env = {}
+Env.wx = 800
+Env.wy = 480
+
 MOAISim.openWindow ("test", screenWidth, screenHeight)
 viewport = MOAIViewport.new ()
 viewport:setSize ( screenWidth, screenHeight )
 
---viewport:setScale ( 640, 480 )
+viewport:setScale ( Env.wx, Env.wy )
+viewport:setOffset(-1, -1) -- origin at bottom left
 --viewport = setupViewport(COLS, ROWS, "test")
 
 if MOAIApp ~= nil then
@@ -36,8 +41,9 @@ if MOAIApp ~= nil then
 end
 
 
---statemgr.push ( "StateMenu.lua" )
-statemgr.push ( "StateLevel.lua" )
+statemgr.push ( "StateMenu.lua" )
+--statemgr.push ( "StateLevel.lua" )
+--statemgr.pop()
 --statemgr.push ( "StateSelectLevel.lua" )
 statemgr.begin()
 

@@ -14,22 +14,18 @@ local tilesLayer = nil
 local fgLayer = nil
 
 local board = nil
+local grid = nil
+local gridProp = nil
 
 local mouseProp = nil
 local tiles = nil
 
-local cache = {}
 
-local function getGfx(fname)
-    if cache[fname] ~= nil then
-        return cache[fname]
-    end
-    local quad = MOAIGfxQuad2D.new()
-    quad:setTexture (fname)
+local function getGfx(fname, layer)
+    local prop, quad = staticImage(fname, layer, -1, -1, 0, 0)
     quad:setRect (-1, -1, 0, 0)
     quad:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
-    cache[fname] = quad
-    return quad
+    return prop, quad
 end
 
 --MOAIGfxDevice.setClearColor(0.58, 0.81, 0.98, 1)
@@ -53,14 +49,23 @@ resources[GRAPE] = 'grape.png'
 resources[KIWI] = 'kiwi.png'
 resources[EMPTY] = 'empty.png'
 
-local highlightGfx = getGfx('highlight.png')
-local targetGfx = getGfx('target.png')
+local tilemap = {}
+tilemap[MOUSE] = 1
+tilemap[CHEESE] = 2
+tilemap[BANANA] = 3
+tilemap[KIWI] = 4
+tilemap[ORANGE] = 5
+tilemap[GRAPE] = 6
+tilemap[EMPTY] = 7
+
+--local highlightGfx = getGfx('highlight.png')
+--local targetGfx = getGfx('target.png')
 
 
-local gfx = {}
-for id, fname in pairs(resources) do
-    gfx[id] = getGfx(fname)
-end
+--local gfx = {}
+--for id, fname in pairs(resources) do
+--    gfx[id] = getGfx(fname)
+--end
 
 function setBackground()
     --bgGfx = MOAIGfxQuad2D.new()
@@ -99,8 +104,7 @@ function drawBoard()
             --tileProp:setLoc(x, y)
             --tilesLayer:insertProp (tileProp)
             --tiles[x][y] = tileProp
-            local tileProp, quad = staticImage(resources[what], tilesLayer, -1, -1, 0, 0)
-            quad:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
+            local tileProp, quad = getGfx(resources[what], tilesLayer)
             tiles[x][y] = tileProp
             tileProp:setLoc(x, y)
 
@@ -108,16 +112,17 @@ function drawBoard()
                 mouseProp = tileProp
             end
             if board:is_legal(x, y) then
-                local highlightProp = MOAIProp2D.new ()
-                highlightProp:setDeck(highlightGfx)
+                --local highlightProp = MOAIProp2D.new ()
+                --highlightProp:setDeck(highlightGfx)
+                local highlightProp = getGfx('highlight.png', highlightsLayer)
                 highlightProp:setLoc(x, y)
-                highlightsLayer:insertProp(highlightProp)
+                --highlightsLayer:insertProp(highlightProp)
             end
         end
     end
 end
 
-function initBoard(map)
+function StateLevel:initBoard(map)
     if map == nil then
         board = Board:new(COLS, ROWS)
         board:fill_random()
@@ -126,7 +131,7 @@ function initBoard(map)
     else
         board = map:copy()
     end
-    drawBoard()
+    --drawBoard()
 end
 
 local hoverProp = nil
@@ -139,21 +144,23 @@ local function highlightTargets(x, y)
     end
     targetsLayer:clear()
     for _, pos in pairs(board:eat_locs(x, y)) do
-        local targetProp = MOAIProp2D.new ()
-        targetProp:setDeck(targetGfx)
+        --local targetProp = MOAIProp2D.new ()
+        --targetProp:setDeck(targetGfx)
+        local targetProp = getGfx('target.png', targetsLayer)
         targetProp:setLoc(pos.x, pos.y)
-        targetsLayer:insertProp(targetProp)
+        --targetsLayer:insertProp(targetProp)
     end
     recentHighlightX = x
     recentHighlightY = y
 end
 
 function StateLevel:endGame()
-    mouseProp:seekLoc(COLS / 2, ROWS / 2, 1)
-    mouseProp:moveRot(360, 2)
-    wait(mouseProp:seekScl(3, 3, 3))
+    --mouseProp:seekLoc(COLS / 2, ROWS / 2, 1)
+    --mouseProp:moveRot(360, 2)
+    --wait(mouseProp:seekScl(3, 3, 3))
     if self.isArcade then
-        initBoard()
+        self:initBoard()
+        self:refreshGrid()
     else
         statemgr.pop()
     end
@@ -168,7 +175,7 @@ function StateLevel:animateEat(x, y)
     local function threadAnim()
         for _, pos in pairs(board:eat_locs(x, y)) do
             wait ( mouseProp:seekLoc ( pos.x, pos.y, 0.1))
-            tiles[pos.x][pos.y]:setDeck(gfx[EMPTY])
+            tiles[pos.x][pos.y]:setDeck(getQuad(resources[EMPTY]), -1, -1, 0, 0)
         end
         board:eat(x, y)
         drawBoard()
@@ -181,7 +188,7 @@ function StateLevel:animateEat(x, y)
     thread:run ( threadAnim )
 end
 
-local function mouseOver(sx, sy)
+function StateLevel:mouseOver(sx, sy)
     if mouseProp == nil then
         return
     end
@@ -200,24 +207,80 @@ local function mouseOver(sx, sy)
     end
 end
 
-local function click(sx, sy)
-    local wox, woy = tilesLayer:wndToWorld(sx, sy)
-    local x, y = math.ceil(wox), math.ceil(woy)
-    --print(sx, sy, wox, woy, x, y)
+function StateLevel:refreshGrid()
+    for i=1, board.width do
+        for j=1, board.height do
+            grid:setTile(i, j, tilemap[board[i][j]])
+        end
+    end
+end
+
+function StateLevel:setupGrid()
+    grid = MOAIGrid.new()
+    local deck = MOAITileDeck2D.new()
+
+    local barHeight = Env.wy / 10
+    local padding = 10
+    local tileHeight = (Env.wy - padding - barHeight) / board.height
+    local tileWidth = (Env.wx - 2 * padding) / board.width
+    grid:initRectGrid(board.width, board.height, tileWidth, tileHeight)
+    deck:setTexture("tiles.png")
+    deck:setSize(4, 2)
+    --[[grid:initHexGrid ( wx, wy, tileSize )
+    deck:setTexture ( "hex-tiles.png" )
+    deck:setSize ( 4, 4, 0.25, 0.216796875 )]]
+    
+    self:refreshGrid()
+
+    gridProp = MOAIProp2D.new()
+    gridProp:setDeck(deck)
+    gridProp:setGrid(grid)
+    gridProp:setLoc(padding, padding)
+
+    tilesLayer:insertProp(gridProp)
+
+    --textBox("123", layer, 20, 20, 30, 300)
+
+    for i=1, board.width do
+        for j=1, board.height do
+            --local tx, ty = grid:cellAddrToCoord(i, j)
+            local tx, ty = grid:getTileLoc(i, j)
+            local x, y = gridProp:modelToWorld(tx, ty)
+            --local x, y = layer:worldToWnd(mx, my)
+            --print(mx, my)
+            --textBox("".. tileToIndex(i, j), layer, x , y, x + tileSize / 2, y + tileSize / 2)
+        end
+    end
+end
+
+function StateLevel:click(wix, wiy)
+    local wox, woy = tilesLayer:wndToWorld ( wix, wiy ) 
+    local mx, my = gridProp:worldToModel ( wox, woy ) 
+    local x, y = grid:locToCoord ( mx, my ) 
+
+    if x < 1 or x > board.width or y < 1 or y > board.height then
+        return
+    end
+
     hoverProp:setVisible(false)
+
     if board:is_legal(x, y) then
-        --board:eat(x, y)
+        board:eat(x, y)
         --particle:go(fgLayer, 2,2,3,3)
         --drawBoard()
-        StateLevel:animateEat(x, y)
+        --StateLevel:animateEat(x, y)
+        self:refreshGrid()
+        if not board:has_cheese() then
+            self:endGame()
+        end
     end
 end
 
 StateLevel.onInput = function ( self )
 	if inputmgr:up () then
-		click ( inputmgr:getTouch ())		
+		self:click ( inputmgr:getTouch ())		
 	elseif inputmgr:down () then
-		mouseOver( inputmgr:getTouch ())
+		self:mouseOver( inputmgr:getTouch ())
 	end
 end
 
@@ -233,12 +296,13 @@ function StateLevel:onLoad(map)
     --clearLayers()
     --viewport = setupViewport(COLS, -ROWS, "test")
     --viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
+    --[[
     if self.viewport == nil then
 	    self.viewport = MOAIViewport.new ()
 	    self.viewport:setSize ( screenWidth, screenHeight )
         self.viewport:setScale ( COLS, -ROWS )
         self.viewport:setOffset(-1, 1) -- origin at top left
-    end
+    end]]
     bgLayer = newLayer(self)
 
     highlightsLayer = newLayer(self)
@@ -249,19 +313,21 @@ function StateLevel:onLoad(map)
 
     fgLayer = newLayer(self)
     
-    hoverProp = MOAIProp2D.new ()
-    hoverProp:setDeck ( gfx[MOUSE] )
+    hoverProp, quad = getGfx(resources[MOUSE], fgLayer)
+    --hoverProp:setDeck ( gfx[MOUSE] )
     hoverProp:setVisible(false)
-    fgLayer:insertProp(hoverProp)
+    --fgLayer:insertProp(hoverProp)
 
-    setBackground()
+    --setBackground()
+    staticImage('bg.jpg', bgLayer, 0, 0, Env.wx, Env.wy)
     
     if map == nil then
         self.isArcade = true
     else
         self.isArcade = false
     end
-    initBoard(map)
+    self:initBoard(map)
+    self:setupGrid()
     --setupControl(mouseOver, click)
 end
 

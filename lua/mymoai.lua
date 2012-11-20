@@ -8,15 +8,22 @@ end
 
 
 local cache = {}
-function staticImage(fname, layer, minX, minY, maxX, maxY)
-    local gfx = cache[fname]
+function getQuad(fname, minX, minY, maxX, maxY)
+    local cacheName = fname .. "=" .. table.concat({minX, minY, maxX, maxY}, ",")
+    print(cacheName)
+    local gfx = cache[cacheName]
     if gfx == nil then
         gfx = MOAIGfxQuad2D.new()
         gfx:setTexture(fname)
-        cache[fname] = gfx
+        gfx:setUVRect ( 0, 1, 1, 0 )
+        gfx:setRect(minX, minY, maxX, maxY)
+        cache[cacheName] = gfx
     end
-    gfx:setRect(minX, minY, maxX, maxY)
-    --gfx:setUVRect ( 0, 0, 1, 1 )
+    return gfx
+end
+
+function staticImage(fname, layer, minX, minY, maxX, maxY)
+    local gfx = getQuad(fname, minX, minY, maxX, maxY)
     local prop = MOAIProp2D.new ()
     prop:setDeck(gfx)
     layer:insertProp (prop)
@@ -61,7 +68,6 @@ function setupControl(mouseOver, click)
         MOAIInputMgr.device.touch:setCallback (
             function ( eventType, idx, sx, sy, tapCount )
                 if eventType == MOAITouchSensor.TOUCH_UP then
-                    --tilesLayer:removeProp(highlightProp)
                     click(sx, sy)
                 end
                 if eventType == MOAITouchSensor.TOUCH_DOWN or eventType == MOAITouchSensor.TOUCH_MOVE then
@@ -118,7 +124,7 @@ function newLayer(state)
     assert(viewport ~= nil)
     assert(state ~= nil)
     local layer = MOAILayer2D.new ()
-    layer:setViewport ( state.viewport )
+    layer:setViewport ( viewport )
     --MOAISim.pushRenderPass ( layer )
     
     -- The state-manager has a set of layers for whichever place
