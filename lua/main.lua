@@ -26,8 +26,14 @@ if screenHeight == nil then screenHeight = 480 end
 Env = {}
 Env.wx = 800
 Env.wy = 480
+Env.Screen = {}
+Env.Screen.width = screenWidth
+Env.Screen.height = screenHeight
+Env.scale = Env.Screen.height / Env.wy
 
 MOAISim.openWindow ("test", screenWidth, screenHeight)
+MOAIGfxDevice.setClearColor(0.1, 0.4, 0.9, 1)
+
 viewport = MOAIViewport.new ()
 viewport:setSize ( screenWidth, screenHeight )
 
@@ -41,10 +47,9 @@ if MOAIApp ~= nil then
 end
 
 
-statemgr.push ( "StateMenu.lua" )
+--statemgr.push ( "StateMenu.lua" )
 --statemgr.push ( "StateLevel.lua" )
---statemgr.pop()
---statemgr.push ( "StateSelectLevel.lua" )
+statemgr.push ( "StateSelectLevel.lua" )
 statemgr.begin()
 
 --StateMenu:init()

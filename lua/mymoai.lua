@@ -6,6 +6,9 @@ function wait ( action )
     while action:isBusy() do coroutine:yield() end
 end
 
+R = {}
+
+R.fontCache = {}
 
 local cache = {}
 function getQuad(fname, minX, minY, maxX, maxY)
@@ -33,13 +36,13 @@ end
 
 
 
-local font = MOAIFont.new ()
-font:load ( 'arialbd.ttf' )
+local defaultFont = MOAIFont.new ()
+defaultFont:load ( 'arialbd.ttf' )
 --font:loadFromTTF ( "arialbd.ttf", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.?!", 12, 163 )
 
 function textBox(text, layer, minX, minY, maxX, maxY)
     local textbox = MOAITextBox.new ()
-    textbox:setFont ( font )
+    textbox:setFont ( defaultFont )
     textbox:setTextSize ( 12 )
     textbox:setRect ( minX, minY, maxX, maxY )
     --textbox:setLoc(minX, minY)
@@ -51,6 +54,33 @@ function textBox(text, layer, minX, minY, maxX, maxY)
     --textbox:spool ()
     return textbox
 end
+
+function R.getFont(fontName)
+    if fontName == nil then
+        return defaultFont
+    elseif self.fontCache[fontName] == nil then
+        local newFont = MOAIFont.new()
+        newFont:load(fontName)
+        self.fontCache[fontName] = newFont
+    end
+    return self.fontCache[fontName]
+end
+
+function R:label(data)
+    --e.g. R:label({width=10, height=10, font='arialbd.ttf', fontSize=10, layer=layer})
+    --MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX, 1, 1, 1, 1, 1 )
+    local lbl = MOAITextBox.new()
+    lbl:setRect( -data.width * Env.scale / 2, -data.height * Env.scale / 2,
+                  data.width * Env.scale / 2, data.height * Env.scale / 2 )
+    lbl:setScl( 1 / Env.scale )
+    lbl:setFont( R.getFont( data.font ) )
+    lbl:setYFlip ( true )
+    lbl:setString ( data.text )
+    lbl:setTextSize( data.fontSize * Env.scale )
+    data.layer:insertProp ( lbl )
+    return lbl
+end
+
 
 
 function resetControl()

@@ -12,10 +12,10 @@ local layer = nil
 local gridProp = nil
 local grid = nil
 local boards = nil
-
+local padding = 10
 
 local wx, wy = 10, 10
-local tileSize = 50
+local tileSize = 80
 
 local function tileToIndex(i, j)
     return (j - 1) * wx + i
@@ -69,7 +69,7 @@ function StateSelectLevel:setupGrid()
     gridProp = MOAIProp2D.new()
     gridProp:setDeck(deck)
     gridProp:setGrid(grid)
-    gridProp:setLoc(10, 10)
+    gridProp:setLoc(padding, padding)
 
     layer:insertProp(gridProp)
 
@@ -82,7 +82,16 @@ function StateSelectLevel:setupGrid()
             local x, y = gridProp:modelToWorld(tx, ty)
             --local x, y = layer:worldToWnd(mx, my)
             --print(mx, my)
-            textBox("".. tileToIndex(i, j), layer, x , y, x + tileSize / 2, y + tileSize / 2)
+            --textBox("".. tileToIndex(i, j), layer, x , y, x + tileSize / 2, y + tileSize / 2)
+            local textProp = R:label({text="".. tileToIndex(i, j),
+                    layer=layer,
+                    width=tileSize,
+                    height=tileSize,
+                    fontSize=tileSize/4})
+            textProp:setAlignment ( MOAITextBox.CENTER_JUSTIFY, MOAITextBox.CENTER_JUSTIFY )
+            textProp:setColor(0.5, 0.3, 0)
+            textProp:setLoc(x + padding, y + padding)
+            print(x,y)
         end
     end
 end
