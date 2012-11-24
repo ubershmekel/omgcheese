@@ -1,6 +1,9 @@
 
 require 'mymoai'
 require 'statemgr'
+require 'inputmgr'
+require 'Board'
+require 'particle'
 
 function onBackButtonPressed ()
 	print ( "onBackButtonPressed: " )
@@ -47,9 +50,9 @@ if MOAIApp ~= nil then
 end
 
 
---statemgr.push ( "StateMenu.lua" )
+statemgr.push ( "StateMenu.lua" )
 --statemgr.push ( "StateLevel.lua" )
-statemgr.push ( "StateSelectLevel.lua" )
+--statemgr.push ( "StateSelectLevel.lua" )
 statemgr.begin()
 
 --StateMenu:init()

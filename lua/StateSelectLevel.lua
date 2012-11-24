@@ -1,10 +1,3 @@
-require 'Board'
-require 'mymoai'
-require 'inputmgr'
-
---MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX, 1, 1, 1, 1, 1 )
---MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX_LAYOUT, 1, 0, 0, 1, 1 )
---MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX_BASELINES, 1, 1, 0, 0, 1 )
 
 StateSelectLevel = {}
 
@@ -21,10 +14,10 @@ local function tileToIndex(i, j)
     return (j - 1) * wx + i
 end
 
-local function click(wix, wiy)
+function StateSelectLevel:click(wix, wiy)
     local wox, woy = layer:wndToWorld ( wix, wiy ) 
     local mx, my = gridProp:worldToModel ( wox, woy ) 
-    local x, y = grid:locToCoord ( mx, my ) 
+    local x, y = grid:locToCoord ( mx, my )
     if x < 1 or x > wx or y < 1 or y > wy then
         return
     end
@@ -36,16 +29,31 @@ local function click(wix, wiy)
     --Level:init(boards[index])
     --print(x, y, mx, my, wox, woy)
     --print(tileToIndex(x, y), tileToIndex(mx, my))
+    --self.lastTouch = nil
 end
 
-local function mouseOver(wx, wy)
+
+--DragClick.click = StateSelectLevel.click
+DragClick.drag = function(dx, dy)
+    --gridProp:moveLoc(dx, dy)
+    StateSelectLevel.camera:moveLoc(-dx, -dy)
+end
+DragClick.click = function(wix, wiy)
+    StateSelectLevel:click(wix, wiy)
+end
+
+
+function StateSelectLevel:mouseDown(wix, wiy)
+    DragClick.down(wix, wiy)
 end
 
 StateSelectLevel.onInput = function ( self )
 	if inputmgr:up () then
-		click ( inputmgr:getTouch ())		
-	elseif inputmgr:down () then
-		mouseOver( inputmgr:getTouch ())
+		--self:click ( inputmgr:getTouch ())
+        DragClick:up( inputmgr:getTouch () )
+	elseif inputmgr:isDown () then
+        DragClick:down( inputmgr:getTouch () )
+		--self:mouseDown( inputmgr:getTouch ())
 	end
 end
 
@@ -91,7 +99,6 @@ function StateSelectLevel:setupGrid()
             textProp:setAlignment ( MOAITextBox.CENTER_JUSTIFY, MOAITextBox.CENTER_JUSTIFY )
             textProp:setColor(0.5, 0.3, 0)
             textProp:setLoc(x + padding, y + padding)
-            print(x,y)
         end
     end
 end
@@ -109,8 +116,6 @@ function StateSelectLevel:onLoad()
     viewport:setScale ( COLS, ROWS )
     viewport:setOffset(-1, -1) -- origin at top left]]
     --viewport = setupViewport(COLS, ROWS, "world")
-    layer = newLayer(self)
-    
     if boards == nil then
         boards = self:loadLevels()
     end
@@ -118,9 +123,14 @@ function StateSelectLevel:onLoad()
     --partition = MOAIPartition.new()
     --layer:setPartition(partition)
     
-    staticImage('bg.jpg', layer, 0, 0, Env.wx, Env.wy)
+    local bgLayer = newLayer(self)
+    staticImage('bg.jpg', bgLayer, 0, 0, Env.wx, Env.wy)
     
+    layer = newLayer(self)
     self:setupGrid()
+    self.camera = MOAICamera2D.new()
+    --self.camera:setLoc(0,100,-10)
+    layer:setCamera(self.camera)
 
     --setupControl(mouseOver, click)
 end

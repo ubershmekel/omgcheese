@@ -1,4 +1,3 @@
-require 'inputmgr'
 
 local StateMenu = {}
 

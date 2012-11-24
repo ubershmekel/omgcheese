@@ -1,7 +1,3 @@
-require 'mymoai'
-require 'Board'
-require 'particle'
-require 'inputmgr'
 
 StateLevel = {}
 
