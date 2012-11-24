@@ -208,17 +208,3 @@ function clearLayers()
     end
 end
 
---[[function mouseThread()
-    local mainThread = MOAICoroutine.new ()
-    mainThread:run (function ()
-
-        local frames = 0
-        while true do
-            coroutine.yield ()
-            frames = frames + 1
-            if MOAIInputMgr.device.mouseLeft:down () then
-                print ( MOAIInputMgr.device.pointer:getLoc () )
-            end
-        end
-    end)
-end]]

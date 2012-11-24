@@ -12,8 +12,6 @@ function onBackButtonPressed ()
     	return false
     end
     
-    --local callback = table.remove(states, #states)
-    --callback()
     statemgr.pop()
 
 	-- Return true if you want to override the back button press and prevent the system from handling it.
@@ -42,7 +40,6 @@ viewport:setSize ( screenWidth, screenHeight )
 
 viewport:setScale ( Env.wx, Env.wy )
 viewport:setOffset(-1, -1) -- origin at bottom left
---viewport = setupViewport(COLS, ROWS, "test")
 
 if MOAIApp ~= nil then
     -- android
@@ -50,11 +47,9 @@ if MOAIApp ~= nil then
 end
 
 
-statemgr.push ( "StateMenu.lua" )
---statemgr.push ( "StateLevel.lua" )
+--statemgr.push ( "StateMenu.lua" )
+statemgr.push ( "StateLevel.lua" )
 --statemgr.push ( "StateSelectLevel.lua" )
 statemgr.begin()
 
---StateMenu:init()
---arcade()
---levels()
+

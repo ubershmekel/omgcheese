@@ -13,10 +13,10 @@ local board = nil
 local grid = nil
 local gridProp = nil
 
-local mouseProp = nil
 local tiles = nil
 
 local barHeight = Env.wy / 10
+local padding = 10
 
 local function getGfx(fname, layer)
     local prop, quad = staticImage(fname, layer, -1, -1, 0, 0)
@@ -24,27 +24,6 @@ local function getGfx(fname, layer)
     quad:setUVRect ( 0, 0, 1, 1 ) -- landscape textures
     return prop, quad
 end
-
---MOAIGfxDevice.setClearColor(0.58, 0.81, 0.98, 1)
-
---[[function onDraw()
-    MOAIGfxDevice.setPenColor ( 1, 0, 0, 1 )
-    MOAIGfxDevice.setPenWidth ( 2 )
-    MOAIDraw.fillRect(1,1,3,3)
-end
-
-scriptDeck = MOAIScriptDeck.new ()
-scriptDeck:setRect ( -4, -4, 4, 4 )
-scriptDeck:setDrawCallback ( onDraw )]]
-
-local resources = {}
-resources[MOUSE] = 'gopher.png'
-resources[CHEESE] = 'cake.png'
-resources[BANANA] = 'banana.png'
-resources[ORANGE] = 'orange.png'
-resources[GRAPE] = 'grape.png'
-resources[KIWI] = 'kiwi.png'
-resources[EMPTY] = 'empty.png'
 
 local tilemap = {}
 tilemap[MOUSE] = 1
@@ -63,18 +42,6 @@ tilemap[EMPTY] = 7
 --for id, fname in pairs(resources) do
 --    gfx[id] = getGfx(fname)
 --end
-
-function setBackground()
-    --bgGfx = MOAIGfxQuad2D.new()
-    --bgGfx:setTexture('bg.jpg')
-    local bgProp, bgGfx = staticImage('bg.jpg', bgLayer, -1, -1, COLS - 1, ROWS - 1)
-    --bgGfx:setRect (-1, -1, COLS - 1, ROWS - 1)
-    bgGfx:setUVRect ( 0, 0, 1, 1 )
-    --bgProp = MOAIProp2D.new ()
-    --bgProp:setDeck(bgGfx)
-    --bgLayer:insertProp (bgProp)
-    bgProp:setLoc(1, 1)
-end
 
 --gfxQuad:setRect ( 0, 0, 1, 1 )
 --gfxQuad:setUVRect ( 0, 1, 1, 0 ) -- landscape textures
@@ -153,32 +120,44 @@ local function highlightTargets(x, y)
     recentHighlightY = y
 end
 
+function StateLevel:gridToWorld(grx, gry)
+    local tx, ty = grid:getTileLoc(grx, gry)
+    return gridProp:modelToWorld(tx, ty)
+end
+
 function StateLevel:endGame()
-    --mouseProp:seekLoc(COLS / 2, ROWS / 2, 1)
-    --mouseProp:moveRot(360, 2)
-    --wait(mouseProp:seekScl(3, 3, 3))
+    self.mouseProp:seekLoc(Env.wx / 2, Env.wy / 2, 1)
+    self.mouseProp:moveRot(360, 2)
+    wait(self.mouseProp:seekScl(3 * self.tileWidth, 3 * self.tileHeight, 3))
     if self.isArcade then
         self:initBoard()
         self:refreshGrid()
+        self:refreshHUD()
     else
         statemgr.pop()
     end
 end
 
-
 function StateLevel:animateEat(x, y)
     targetsLayer:clear()
     highlightsLayer:clear()
-    mouseProp:setVisible(true)
-    hoverProp:setVisible(false)
+    --mouseProp:setVisible(true)
+    --hoverProp:setVisible(false)
+    
+    
     local function threadAnim()
         for _, pos in pairs(board:eat_locs(x, y)) do
-            wait ( mouseProp:seekLoc ( pos.x, pos.y, 0.1))
-            tiles[pos.x][pos.y]:setDeck(getQuad(resources[EMPTY]), -1, -1, 0, 0)
+            local wox, woy = self:gridToWorld(pos.x, pos.y)
+            wait ( self.mouseProp:seekLoc ( wox, woy, 0.1))
+            self:setTile(pos.x, pos.y, EMPTY)
         end
+        local wox, woy = self:gridToWorld(x, y)
+        wait ( self.mouseProp:seekLoc ( wox, woy, 0.1))
         board:eat(x, y)
-        drawBoard()
+        --drawBoard()
+        --refreshGrid()
 
+        self:refreshHUD()
         if not board:has_cheese() then
             self:endGame()
         end
@@ -194,7 +173,7 @@ function StateLevel:mouseOver(sx, sy)
     local x, y = tilesLayer:wndToWorld(sx, sy)
     x, y = math.ceil(x), math.ceil(y)
     if board:is_legal(x, y) then
-        mouseProp:setVisible(false)
+        --mouseProp:setVisible(false)
         hoverProp:setVisible(true)
         hoverProp:setLoc(x, y)
         highlightTargets(x, y)
@@ -208,41 +187,70 @@ end
 
 --local barSections = {"turns", "target", "back"}
 
+function StateLevel:setTile(x, y, what)
+    --tiles[pos.x][pos.y]:setDeck(getQuad(resources[EMPTY]), -1, -1, 0, 0)
+    grid:setTile(x, y, tilemap[what])
+end
+
 function StateLevel:refreshHUD()
     self.turnsText:setString(self.turns .. "/".. self.minTurns .. " turns")
     --self.targetTurnsText:setString('' .. )
 end
 
+function StateLevel:setupHUD()
+    local width = Env.wx / 3
+    self.turnsText = textBox("Turns", fgLayer, 0, Env.wy - barHeight, width, Env.wy)
+    self.turnsText:setTextSize(30)
+end
+
 function StateLevel:refreshGrid()
     for i=1, board.width do
         for j=1, board.height do
-            grid:setTile(i, j, tilemap[board[i][j]])
+            local what = board[i][j]
+
+            if what == MOUSE then
+                self:setTile(i, j, EMPTY)
+                if self.mouseProp == nil then
+                    self.mouseProp = MOAIProp2D.new()
+                    --mouseProp:setDeck(getQuad('mouse.png', 0,0,100,100))
+                    self.mouseProp:setDeck(self.tileDeck)
+                    self.mouseProp:setIndex(tilemap[MOUSE])
+                    fgLayer:insertProp(self.mouseProp)
+                end
+                self.mouseProp:setLoc(self:gridToWorld(board:find_tile(MOUSE)))
+                self.mouseProp:setScl(self.tileWidth, self.tileHeight)
+            else
+                self:setTile(i, j, what)
+            end
         end
     end
-    self:refreshHUD()
 end
 
 function StateLevel:setupGrid()
     grid = MOAIGrid.new()
     local deck = MOAITileDeck2D.new()
+    self.tileDeck = deck
 
-    local padding = 10
-    local tileHeight = (Env.wy - padding - barHeight) / board.height
-    local tileWidth = (Env.wx - 2 * padding) / board.width
-    grid:initRectGrid(board.width, board.height, tileWidth, tileHeight)
+    self.tileHeight = (Env.wy - padding - barHeight) / board.height
+    self.tileWidth = (Env.wx - 2 * padding) / board.width
+    grid:initRectGrid(board.width, board.height, self.tileWidth, self.tileHeight)
     deck:setTexture("tiles.png")
     deck:setSize(4, 2)
+
+    --deck:setRect(0, 0, tileWidth, tileHeight)
+    deck:setRect(-0.5, -0.5, 0.5,0.5)
+
     --[[grid:initHexGrid ( wx, wy, tileSize )
     deck:setTexture ( "hex-tiles.png" )
     deck:setSize ( 4, 4, 0.25, 0.216796875 )]]
     
-    self:refreshGrid()
 
     gridProp = MOAIProp2D.new()
     gridProp:setDeck(deck)
     gridProp:setGrid(grid)
     gridProp:setLoc(padding, padding)
 
+    self:refreshGrid()
     tilesLayer:insertProp(gridProp)
 
     --textBox("123", layer, 20, 20, 30, 300)
@@ -268,18 +276,18 @@ function StateLevel:click(wix, wiy)
         return
     end
 
-    hoverProp:setVisible(false)
+    --hoverProp:setVisible(false)
 
     if board:is_legal(x, y) then
         self.turns = self.turns + 1
-        board:eat(x, y)
+        --board:eat(x, y)
         --particle:go(fgLayer, 2,2,3,3)
         --drawBoard()
-        --StateLevel:animateEat(x, y)
-        self:refreshGrid()
-        if not board:has_cheese() then
-            self:endGame()
-        end
+        StateLevel:animateEat(x, y)
+        --self:refreshGrid()
+        --if not board:has_cheese() then
+        --    self:endGame()
+        --end
     end
 end
 
@@ -292,24 +300,7 @@ StateLevel.onInput = function ( self )
 end
 
 function StateLevel:onLoad(map)
-    --MOAISim.openWindow ( "test", WIDTH, HEIGHT )
-    --moai.logger:debug("" .. MOAIEnvironment.screenWidth .. " " .. MOAIEnvironment.screenHeight)
-    --[[MOAISim.openWindow ("test", screenWidth, screenHeight)
-
-    viewport = MOAIViewport.new ()
-    viewport:setSize ( screenWidth, screenHeight )
-    viewport:setScale ( COLS, -ROWS )]]
-
-    --clearLayers()
-    --viewport = setupViewport(COLS, -ROWS, "test")
-    --viewport:setOffset(-math.floor(COLS / 2), -math.floor(ROWS / 2))
-    --[[
-    if self.viewport == nil then
-	    self.viewport = MOAIViewport.new ()
-	    self.viewport:setSize ( screenWidth, screenHeight )
-        self.viewport:setScale ( COLS, -ROWS )
-        self.viewport:setOffset(-1, 1) -- origin at top left
-    end]]
+    self.mouseProp = nil
 
     bgLayer = newLayer(self)
     highlightsLayer = newLayer(self)
@@ -317,18 +308,14 @@ function StateLevel:onLoad(map)
     tilesLayer = newLayer(self)
     fgLayer = newLayer(self)
     
-    hoverProp, quad = getGfx(resources[MOUSE], fgLayer)
+    --hoverProp, quad = getGfx(resources[MOUSE], fgLayer)
     --hoverProp:setDeck ( gfx[MOUSE] )
-    hoverProp:setVisible(false)
+    --hoverProp:setVisible(false)
     --fgLayer:insertProp(hoverProp)
 
     --setBackground()
     staticImage('bg.jpg', bgLayer, 0, 0, Env.wx, Env.wy)
 
-    local width = Env.wx / 3
-    self.turnsText = textBox("Turns", fgLayer, 0, Env.wy - barHeight, width, Env.wy)
-    self.turnsText:setTextSize(24)
-    
     if map == nil then
         self.isArcade = true
     else
@@ -336,7 +323,7 @@ function StateLevel:onLoad(map)
     end
     self:initBoard(map)
     self:setupGrid()
-    --setupControl(mouseOver, click)
+    self:setupHUD()
 end
 
 return StateLevel

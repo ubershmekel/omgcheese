@@ -35,7 +35,6 @@ end
 
 --DragClick.click = StateSelectLevel.click
 DragClick.drag = function(dx, dy)
-    --gridProp:moveLoc(dx, dy)
     StateSelectLevel.camera:moveLoc(-dx, -dy)
 end
 DragClick.click = function(wix, wiy)
@@ -81,16 +80,10 @@ function StateSelectLevel:setupGrid()
 
     layer:insertProp(gridProp)
 
-    --textBox("123", layer, 20, 20, 30, 300)
-
     for i=1, wx do
         for j=1, wy do
-            --local tx, ty = grid:cellAddrToCoord(i, j)
             local tx, ty = grid:getTileLoc(i, j)
             local x, y = gridProp:modelToWorld(tx, ty)
-            --local x, y = layer:worldToWnd(mx, my)
-            --print(mx, my)
-            --textBox("".. tileToIndex(i, j), layer, x , y, x + tileSize / 2, y + tileSize / 2)
             local textProp = R:label({text="".. tileToIndex(i, j),
                     layer=layer,
                     width=tileSize,
