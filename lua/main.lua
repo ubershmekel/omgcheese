@@ -44,8 +44,6 @@ viewport:setSize ( screenWidth, screenHeight )
 viewport:setScale ( Env.wx, Env.wy )
 viewport:setOffset(-1, -1) -- origin at bottom left
 
-DEVICE = true
-
 Env.progress = function(map, setValue)
     assert(map ~= nil)
     assert(map.name ~= nil)
