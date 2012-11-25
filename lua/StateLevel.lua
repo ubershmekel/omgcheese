@@ -143,6 +143,13 @@ function StateLevel:endGame()
         self:refreshHUD()
         self:refreshHighlights()
     else
+        local prog
+        if self.turns == self.minTurns then
+            prog = 3
+        else
+            prog = 2
+        end
+        Env.progress(self.map, prog)
         statemgr.pop()
     end
 end
@@ -170,7 +177,7 @@ function StateLevel:animateEat(x, y)
     local function threadAnim()
         for _, pos in pairs(board:eat_locs(x, y)) do
             local wox, woy = self:gridToWorld(pos.x, pos.y)
-            wait ( self.mouseProp:seekLoc ( wox, woy, stepTime))
+            wait ( self.mouseProp:seekLoc ( wox, woy, stepTime, MOAIEaseType.LINEAR))
             self:setTile(pos.x, pos.y, EMPTY)
         end
         local wox, woy = self:gridToWorld(x, y)
@@ -333,12 +340,6 @@ function StateLevel:onLoad(map)
     tilesLayer = newLayer(self)
     fgLayer = newLayer(self)
     
-    --hoverProp, quad = getGfx(resources[MOUSE], fgLayer)
-    --hoverProp:setDeck ( gfx[MOUSE] )
-    --hoverProp:setVisible(false)
-    --fgLayer:insertProp(hoverProp)
-
-    --setBackground()
     staticImage('bg.jpg', bgLayer, 0, 0, Env.wx, Env.wy)
 
     if map == nil then

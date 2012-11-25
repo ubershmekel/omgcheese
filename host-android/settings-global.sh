@@ -10,8 +10,8 @@
 # application and project names
 #----------------------------------------------------------------#
 
-	project_name="omgcheese"
-	app_name="Get Cheese"
+	project_name="gopherbday"
+	app_name="Gophers Birthday"
 
 #----------------------------------------------------------------#
 # version numbers

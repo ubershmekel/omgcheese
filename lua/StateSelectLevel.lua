@@ -10,7 +10,7 @@ local padding = 10
 local wx, wy = 10, 10
 local tileSize = 80
 
-local function tileToIndex(i, j)
+function StateSelectLevel:tileToIndex(i, j)
     return (j - 1) * wx + i
 end
 
@@ -21,7 +21,7 @@ function StateSelectLevel:click(wix, wiy)
     if x < 1 or x > wx or y < 1 or y > wy then
         return
     end
-    local index = tileToIndex(x, y)
+    local index = self:tileToIndex(x, y)
     print('level ' .. index)
     --local board = boards[index]
     local board = Levels[index]
@@ -69,12 +69,6 @@ function StateSelectLevel:setupGrid()
     deck:setTexture ( "hex-tiles.png" )
     deck:setSize ( 4, 4, 0.25, 0.216796875 )]]
     
-    for i=1, wx do
-        for j=1, wy do
-            grid:setTile(i, j, (j % 3) + 1)
-        end
-    end
-
     gridProp = MOAIProp2D.new()
     gridProp:setDeck(deck)
     gridProp:setGrid(grid)
@@ -86,9 +80,9 @@ function StateSelectLevel:setupGrid()
         for j=1, wy do
             local tx, ty = grid:getTileLoc(i, j)
             local x, y = gridProp:modelToWorld(tx, ty)
-            local mapIndex = tileToIndex(i, j)
-            local mapName = Levels[mapIndex].name
-            local textProp = R:label({text="".. mapName,
+            local mapIndex = self:tileToIndex(i, j)
+            local map = Levels[mapIndex]
+            local textProp = R:label({text="".. map.name,
                     layer=layer,
                     width=tileSize,
                     height=tileSize,
@@ -99,12 +93,19 @@ function StateSelectLevel:setupGrid()
         end
     end
 end
+function StateSelectLevel:refreshGrid()
+    for i=1, wx do
+        for j=1, wy do
+            local mapIndex = self:tileToIndex(i, j)
+            local map = Levels[mapIndex]
+            local prog = Env.progress(map)
+            grid:setTile(i, j, prog)
+        end
+    end
+end
 
-function StateSelectLevel:loadLevels()
-    local text = io.open('levelsNormal.txt'):read("*all")
-    local boards = Board:load_many(text)
-    print('loaded ' .. #boards .. ' boards from ' .. #text )
-    return boards
+function StateSelectLevel:onFocus()
+    self:refreshGrid()
 end
 
 function StateSelectLevel:onLoad()
