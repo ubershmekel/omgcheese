@@ -4,6 +4,8 @@ StateLevel = {}
 local ROWS = 6
 local COLS = 12
 
+local tilesNX, tilesNY = 4, 4
+
 local bgLayer = nil
 local targetsLayer = nil
 local tilesLayer = nil
@@ -89,14 +91,14 @@ function drawBoard()
     end
 end
 
-function StateLevel:initBoard(map)
-    if map == nil then
+function StateLevel:initBoard()
+    if self.map == nil then
         board = Board:new(COLS, ROWS)
         board:fill_random()
         board[1][1] = MOUSE
         board[COLS][ROWS] = CHEESE
     else
-        board = map:copy()
+        board = Board:load(self.map.data):copy()
     end
     self.turns = 0
     self.minTurns = board:copy():solve()
@@ -181,7 +183,7 @@ function StateLevel:animateEat(x, y)
         if not board:has_cheese() then
             self:endGame()
         else
-            wait(self.mouseProp:seekLoc ( wox, woy, stepTime))
+            --wait(self.mouseProp:seekLoc ( wox, woy, stepTime))
         end
     end
     local thread = MOAIThread.new ()
@@ -219,8 +221,11 @@ function StateLevel:refreshHUD()
         local width = Env.wx / 3
         self.turnsText = textBox("Turns", fgLayer, 0, Env.wy - barHeight, width, Env.wy)
         self.turnsText:setTextSize(30)
+        self.levelText = textBox("Level", fgLayer, Env.wx - width, Env.wy - barHeight, Env.wx, Env.wy)
+        self.levelText:setTextSize(30)
     end
     self.turnsText:setString(self.turns .. "/".. self.minTurns .. " turns")
+    self.levelText:setString(self.title)
 end
 
 function StateLevel:refreshGrid()
@@ -255,7 +260,7 @@ function StateLevel:setupGrid()
     self.tileWidth = (Env.wx - 2 * padding) / board.width
     grid:initRectGrid(board.width, board.height, self.tileWidth, self.tileHeight)
     deck:setTexture("tiles.png")
-    deck:setSize(4, 2)
+    deck:setSize(tilesNX, tilesNY)
 
     --deck:setRect(0, 0, tileWidth, tileHeight)
     --deck:setRect(-0.5, -0.5, 0.5,0.5)
@@ -338,10 +343,13 @@ function StateLevel:onLoad(map)
 
     if map == nil then
         self.isArcade = true
+        self.title = 'Arcade'
     else
         self.isArcade = false
+        self.title = 'Level ' .. map.name
     end
-    self:initBoard(map)
+    self.map = map
+    self:initBoard()
     self:setupGrid()
     self:refreshGrid()
     self:refreshHUD()

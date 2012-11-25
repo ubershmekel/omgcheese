@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="Button"
+   version="1.1"
+   width="256"
+   height="128"
+   role="button"
+   onload="init()"
+   aria-pressed="false"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="starButton.svg"
+   inkscape:export-filename="/home/yuv/Dropbox/dev/github/omgcheese/source_images/starButton.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata28">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1301"
+     inkscape:window-height="744"
+     id="namedview26"
+     showgrid="false"
+     inkscape:zoom="2.4333333"
+     inkscape:cx="124.50596"
+     inkscape:cy="37.698927"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:showpageshadow="true"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <style
+     type="text/css"
+     id="style3">
+    rect[id=&quot;ButtonBase&quot;] { fill: red; }
+    svg[aria-pressed=&quot;true&quot;] rect[id=&quot;ButtonBase&quot;] { fill: green; }
+    g:hover {cursor: pointer; }
+    g:hover rect[id=&quot;ButtonGlow&quot;] {opacity: 0; }
+  </style>
+  <script
+     type="text/ecmascript"
+     id="script5">
+
+    var textOn = &quot;On&quot;;
+    var textOff = &quot;Off&quot;;
+
+    function init() {
+
+        <!-- Get color from style -->
+
+
+
+        var color = window.frameElement.style.color;
+	var ButtonBase  = document.getElementById(&quot;ButtonBase&quot;);
+        ButtonBase.style.fill=color;
+
+	<!-- Get text from params -->
+
+
+
+	for( var i = 0; i &lt; window.frameElement.childNodes.length; i++ ) {
+	  var node = window.frameElement.childNodes[ i ];
+	  if( node.nodeName == &quot;param&quot; ) {
+	    if( node.name == &quot;TextOn&quot; ) {
+	      textOn = node.value;
+	    }
+	    if( node.name == &quot;TextOff&quot; ) {
+	      textOff = node.value;
+            }
+	  }
+         }
+	var Text        = document.getElementById(&quot;Text&quot;);
+	var TextShadow  = document.getElementById(&quot;TextShadow&quot;);
+	Text.firstChild.nodeValue = textOff;
+	TextShadow.firstChild.nodeValue = textOff;
+
+	<!-- Set initial HTML text -->
+
+
+
+	var frameId = window.frameElement.id;
+	top.status(textOff, frameId);
+    }
+
+    function buttonEvent(event) {
+      if ((event.type == &quot;click&quot; &amp;&amp; event.button == 0) ||
+          (event.type == &quot;keydown&quot; &amp;&amp;
+	  (event.keyCode == 32 || event.keyCode ==13))) {
+
+	var SVGDocument = event.target.ownerDocument;
+	var SVGRoot     = SVGDocument.documentElement;
+	var Text        = SVGDocument.getElementById(&quot;Text&quot;);
+	var TextShadow  = SVGDocument.getElementById(&quot;TextShadow&quot;);
+
+        var pressed = false;
+	var text = textOff;
+
+        if (&quot;false&quot; == SVGRoot.getAttribute(&quot;aria-pressed&quot;)) {
+         pressed = true;
+	 text = textOn;
+        }
+
+        SVGRoot.setAttribute(&quot;aria-pressed&quot;, pressed);
+	Text.firstChild.nodeValue = text;
+	TextShadow.firstChild.nodeValue = text;
+
+	var frameId = window.frameElement.id;
+	top.status(text, frameId);
+
+      }
+    }
+  </script>
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3815">
+      <stop
+         style="stop-color:#ffff00;stop-opacity:1;"
+         offset="0"
+         id="stop3821" />
+      <stop
+         id="stop3823"
+         offset="0.60273975"
+         style="stop-color:#ffbb00;stop-opacity:1;" />
+      <stop
+         id="stop3819"
+         offset="1"
+         style="stop-color:#ffff00;stop-opacity:0.52307695;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3778">
+      <stop
+         offset="0"
+         style="stop-color:#0070ff;stop-opacity:1;"
+         id="stop3780" />
+      <stop
+         offset="1"
+         style="stop-color:#ffffff;stop-opacity:0"
+         id="stop3782" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3159">
+      <stop
+         id="stop3163"
+         style="stop-color:#000000;stop-opacity:0"
+         offset="0">
+        <animate
+           attributeName="stop-opacity"
+           values="0;0.5;0"
+           dur="2s"
+           repeatCount="indefinite"
+           id="animate10" />
+      </stop>
+      <stop
+         id="stop3161"
+         style="stop-color:#000000;stop-opacity:0.5"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3030">
+      <stop
+         id="stop3032"
+         style="stop-color:#ffffff;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop3034"
+         style="stop-color:#ffffff;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="120"
+       y1="10"
+       x2="120"
+       y2="50"
+       id="linearGradient3113"
+       xlink:href="#linearGradient3030"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.1494396,0,0,1.5753425,-9.9327505,-42.328767)" />
+    <radialGradient
+       cx="161.81506"
+       cy="175.34247"
+       r="100"
+       fx="161.81506"
+       fy="175.34247"
+       id="radialGradient3165"
+       xlink:href="#linearGradient3159"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0,-1.1457037,2.2988792,0,-262.80947,225.47945)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3778"
+       id="linearGradient3776"
+       x1="45.11644"
+       y1="44.109585"
+       x2="217.07536"
+       y2="44.109585"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(0.41095894,-9.4520507)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3815"
+       id="radialGradient3825"
+       cx="86.183281"
+       cy="79.627213"
+       fx="86.183281"
+       fy="79.627213"
+       r="50.666508"
+       gradientTransform="matrix(1,0,0,1.0044559,0,-0.31105392)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3815"
+       id="radialGradient3847"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.0044559,0,-0.31105392)"
+       cx="86.183281"
+       cy="79.627213"
+       fx="86.183281"
+       fy="79.627213"
+       r="50.666508" />
+  </defs>
+  <g
+     id="layer1"
+     onkeydown="return buttonEvent(evt);"
+     onclick="return buttonEvent(evt);"
+     transform="translate(0,28)">
+    <rect
+       width="252.87671"
+       height="126.0274"
+       ry="63.013699"
+       x="1.5616455"
+       y="-26.575342"
+       id="ButtonBase"
+       style="fill:#ff8f00;fill-opacity:1;stroke:none" />
+    <rect
+       width="252.87671"
+       height="126.0274"
+       ry="63.013699"
+       x="1.5616455"
+       y="-26.575342"
+       id="ButtonGlow"
+       style="opacity:0.44015443;fill:url(#radialGradient3165);stroke:none" />
+    <path
+       sodipodi:type="star"
+       style="fill:url(#radialGradient3825);fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="path3805"
+       sodipodi:sides="8"
+       sodipodi:cx="90"
+       sodipodi:cy="70.054794"
+       sodipodi:r1="51.787346"
+       sodipodi:r2="27.291931"
+       sodipodi:arg1="0.62762943"
+       sodipodi:arg2="1.0203285"
+       inkscape:flatsided="false"
+       inkscape:rounded="0.1"
+       inkscape:randomized="0.015"
+       d="m 132.38461,101.07924 c -1.6285,2.33226 -25.03936,-8.948916 -27.43525,-7.412131 -2.39589,1.536785 -3.33109,26.527711 -6.138051,27.025301 C 96.004351,121.19 86.815783,97.750871 84.032483,97.034408 81.249183,96.317945 61.790475,113.62519 59.463728,111.99842 57.136981,110.37164 67.886948,87.392997 66.422798,84.952621 64.958647,82.512245 40.012655,80.757149 39.63099,77.948601 39.249326,75.140054 62.596055,66.345043 63.319267,63.601013 64.04248,60.856982 46.23939,42.421725 47.858317,40.09019 c 1.618928,-2.331534 25.358131,8.944109 27.776411,7.447611 2.418281,-1.496497 2.967625,-28.102866 5.796889,-28.614403 2.829263,-0.511537 11.999691,24.571863 14.778825,25.211624 2.779134,0.639762 22.591948,-18.142429 24.909918,-16.48215 2.31797,1.660279 -8.78846,26.14848 -7.30023,28.563937 1.48823,2.415458 26.68676,2.665044 27.13297,5.48588 0.44621,2.820835 -23.022,11.573956 -23.68828,14.347588 -0.66627,2.773633 16.74828,22.696699 15.11979,25.028963 z"
+       transform="translate(-26.712329,-43.20548)"
+       inkscape:transform-center-x="-0.41859175"
+       inkscape:transform-center-y="-0.48332954" />
+    <path
+       inkscape:transform-center-y="-0.38508659"
+       inkscape:transform-center-x="-0.23430464"
+       transform="matrix(0.61876063,-0.26404412,0.27705053,0.5897123,124.21575,32.167735)"
+       d="m 132.38461,101.07924 c -1.6285,2.33226 -25.03936,-8.948916 -27.43525,-7.412131 -2.39589,1.536785 -3.33109,26.527711 -6.138051,27.025301 C 96.004351,121.19 86.815783,97.750871 84.032483,97.034408 81.249183,96.317945 61.790475,113.62519 59.463728,111.99842 57.136981,110.37164 67.886948,87.392997 66.422798,84.952621 64.958647,82.512245 40.012655,80.757149 39.63099,77.948601 39.249326,75.140054 62.596055,66.345043 63.319267,63.601013 64.04248,60.856982 46.23939,42.421725 47.858317,40.09019 c 1.618928,-2.331534 25.358131,8.944109 27.776411,7.447611 2.418281,-1.496497 2.967625,-28.102866 5.796889,-28.614403 2.829263,-0.511537 11.999691,24.571863 14.778825,25.211624 2.779134,0.639762 22.591948,-18.142429 24.909918,-16.48215 2.31797,1.660279 -8.78846,26.14848 -7.30023,28.563937 1.48823,2.415458 26.68676,2.665044 27.13297,5.48588 0.44621,2.820835 -23.022,11.573956 -23.68828,14.347588 -0.66627,2.773633 16.74828,22.696699 15.11979,25.028963 z"
+       inkscape:randomized="0.015"
+       inkscape:rounded="0.1"
+       inkscape:flatsided="false"
+       sodipodi:arg2="1.0203285"
+       sodipodi:arg1="0.62762943"
+       sodipodi:r2="27.291931"
+       sodipodi:r1="51.787346"
+       sodipodi:cy="70.054794"
+       sodipodi:cx="90"
+       sodipodi:sides="8"
+       id="path3845"
+       style="fill:url(#radialGradient3847);fill-opacity:1;fill-rule:nonzero;stroke:none"
+       sodipodi:type="star" />
+    <path
+       d="m 47.53923,-18.698631 160.92154,0 c 12.73579,0 25.88155,17.1932886 22.98879,31.50685 -2.10849,10.432678 -10.253,7.876713 -22.98879,7.876713 l -160.92154,0 c -12.735791,0 -20.880339,2.556012 -22.988792,-7.876713 -2.892768,-14.3135614 10.253001,-31.50685 22.988792,-31.50685 z"
+       id="ButtonHighlight"
+       style="fill:url(#linearGradient3113)"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:url(#linearGradient3776);fill-opacity:1;stroke:none"
+       d="m 46.005593,38.625319 46.446688,38.79374 C 121.9161,40.829179 141.92786,20.266699 217.00812,-8.1040007 142.36429,1.6986593 114.15882,25.473929 90.884858,59.523159 z"
+       id="path3768"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+  </g>
+</svg>

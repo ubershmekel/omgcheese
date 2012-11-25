@@ -4,7 +4,7 @@ StateSelectLevel = {}
 local layer = nil
 local gridProp = nil
 local grid = nil
-local boards = nil
+--local boards = nil
 local padding = 10
 
 local wx, wy = 10, 10
@@ -23,9 +23,11 @@ function StateSelectLevel:click(wix, wiy)
     end
     local index = tileToIndex(x, y)
     print('level ' .. index)
-    print(boards[index])
+    --local board = boards[index]
+    local board = Levels[index]
+    print(board.data)
     
-    statemgr.push('StateLevel.lua', boards[index])
+    statemgr.push('StateLevel.lua', board)
     --Level:init(boards[index])
     --print(x, y, mx, my, wox, woy)
     --print(tileToIndex(x, y), tileToIndex(mx, my))
@@ -61,15 +63,15 @@ function StateSelectLevel:setupGrid()
     local deck = MOAITileDeck2D.new()
 
     grid:initRectGrid(wx, wy, tileSize, tileSize)
-    deck:setTexture("button.png")
-    deck:setSize(1, 1)
+    deck:setTexture("buttons.png")
+    deck:setSize(4, 1)
     --[[grid:initHexGrid ( wx, wy, tileSize )
     deck:setTexture ( "hex-tiles.png" )
     deck:setSize ( 4, 4, 0.25, 0.216796875 )]]
     
     for i=1, wx do
         for j=1, wy do
-            grid:setTile(i, j, (j % 4) + 1)
+            grid:setTile(i, j, (j % 3) + 1)
         end
     end
 
@@ -84,7 +86,9 @@ function StateSelectLevel:setupGrid()
         for j=1, wy do
             local tx, ty = grid:getTileLoc(i, j)
             local x, y = gridProp:modelToWorld(tx, ty)
-            local textProp = R:label({text="".. tileToIndex(i, j),
+            local mapIndex = tileToIndex(i, j)
+            local mapName = Levels[mapIndex].name
+            local textProp = R:label({text="".. mapName,
                     layer=layer,
                     width=tileSize,
                     height=tileSize,
@@ -109,9 +113,9 @@ function StateSelectLevel:onLoad()
     viewport:setScale ( COLS, ROWS )
     viewport:setOffset(-1, -1) -- origin at top left]]
     --viewport = setupViewport(COLS, ROWS, "world")
-    if boards == nil then
-        boards = self:loadLevels()
-    end
+    --if boards == nil then
+    --    boards = self:loadLevels()
+    --end
     
     --partition = MOAIPartition.new()
     --layer:setPartition(partition)
