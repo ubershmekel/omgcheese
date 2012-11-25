@@ -13,7 +13,7 @@ R.fontCache = {}
 local cache = {}
 function getQuad(fname, minX, minY, maxX, maxY)
     local cacheName = fname .. "=" .. table.concat({minX, minY, maxX, maxY}, ",")
-    print(cacheName)
+    --print(cacheName)
     local gfx = cache[cacheName]
     if gfx == nil then
         gfx = MOAIGfxQuad2D.new()

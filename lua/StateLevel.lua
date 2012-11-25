@@ -34,6 +34,9 @@ tilemap[ORANGE] = 5
 tilemap[GRAPE] = 6
 tilemap[EMPTY] = 7
 
+highlightTile = 8
+targetTile = 9
+
 --local highlightGfx = getGfx('highlight.png')
 --local targetGfx = getGfx('target.png')
 
@@ -121,21 +124,38 @@ local function highlightTargets(x, y)
 end
 
 function StateLevel:gridToWorld(grx, gry)
-    local tx, ty = grid:getTileLoc(grx, gry)
-    return gridProp:modelToWorld(tx, ty)
+    --[[local tx, ty = grid:getTileLoc(grx, gry)
+    local wox, woy = gridProp:modelToWorld(tx, ty)
+    print(grx, gry, tx, ty, wox, woy)
+    return wox, woy]]
+    return padding + (grx - 0.5) * self.tileWidth, padding + (gry - 0.5) * self.tileHeight
 end
 
 function StateLevel:endGame()
-    self.mouseProp:seekLoc(Env.wx / 2, Env.wy / 2, 1)
+    self.mouseProp:seekLoc(Env.wx / 2, Env.wy / 2, 3)
     self.mouseProp:moveRot(360, 2)
     wait(self.mouseProp:seekScl(3 * self.tileWidth, 3 * self.tileHeight, 3))
     if self.isArcade then
         self:initBoard()
         self:refreshGrid()
         self:refreshHUD()
+        self:refreshHighlights()
     else
         statemgr.pop()
     end
+end
+
+function StateLevel:refreshHighlights()
+    highlightsLayer:clear()
+    for i=1, board.width do
+        for j=1, board.height do
+            if board:is_legal(i, j) then
+                local highlightProp = staticImage('highlight.png', highlightsLayer, -self.tileWidth/2, -self.tileHeight/2, self.tileWidth/2, self.tileHeight/2)
+                highlightProp:setLoc(self:gridToWorld(i, j))
+            end
+        end
+    end
+
 end
 
 function StateLevel:animateEat(x, y)
@@ -143,23 +163,25 @@ function StateLevel:animateEat(x, y)
     highlightsLayer:clear()
     --mouseProp:setVisible(true)
     --hoverProp:setVisible(false)
-    
+    local stepTime = 0.08
     
     local function threadAnim()
         for _, pos in pairs(board:eat_locs(x, y)) do
             local wox, woy = self:gridToWorld(pos.x, pos.y)
-            wait ( self.mouseProp:seekLoc ( wox, woy, 0.1))
+            wait ( self.mouseProp:seekLoc ( wox, woy, stepTime))
             self:setTile(pos.x, pos.y, EMPTY)
         end
         local wox, woy = self:gridToWorld(x, y)
-        wait ( self.mouseProp:seekLoc ( wox, woy, 0.1))
         board:eat(x, y)
         --drawBoard()
         --refreshGrid()
 
+        self:refreshHighlights()
         self:refreshHUD()
         if not board:has_cheese() then
             self:endGame()
+        else
+            wait(self.mouseProp:seekLoc ( wox, woy, stepTime))
         end
     end
     local thread = MOAIThread.new ()
@@ -193,14 +215,12 @@ function StateLevel:setTile(x, y, what)
 end
 
 function StateLevel:refreshHUD()
+    if self.turnsText == nil then
+        local width = Env.wx / 3
+        self.turnsText = textBox("Turns", fgLayer, 0, Env.wy - barHeight, width, Env.wy)
+        self.turnsText:setTextSize(30)
+    end
     self.turnsText:setString(self.turns .. "/".. self.minTurns .. " turns")
-    --self.targetTurnsText:setString('' .. )
-end
-
-function StateLevel:setupHUD()
-    local width = Env.wx / 3
-    self.turnsText = textBox("Turns", fgLayer, 0, Env.wy - barHeight, width, Env.wy)
-    self.turnsText:setTextSize(30)
 end
 
 function StateLevel:refreshGrid()
@@ -238,7 +258,7 @@ function StateLevel:setupGrid()
     deck:setSize(4, 2)
 
     --deck:setRect(0, 0, tileWidth, tileHeight)
-    deck:setRect(-0.5, -0.5, 0.5,0.5)
+    --deck:setRect(-0.5, -0.5, 0.5,0.5)
 
     --[[grid:initHexGrid ( wx, wy, tileSize )
     deck:setTexture ( "hex-tiles.png" )
@@ -250,12 +270,11 @@ function StateLevel:setupGrid()
     gridProp:setGrid(grid)
     gridProp:setLoc(padding, padding)
 
-    self:refreshGrid()
     tilesLayer:insertProp(gridProp)
 
     --textBox("123", layer, 20, 20, 30, 300)
 
-    for i=1, board.width do
+    --[[for i=1, board.width do
         for j=1, board.height do
             --local tx, ty = grid:cellAddrToCoord(i, j)
             local tx, ty = grid:getTileLoc(i, j)
@@ -264,7 +283,7 @@ function StateLevel:setupGrid()
             --print(mx, my)
             --textBox("".. tileToIndex(i, j), layer, x , y, x + tileSize / 2, y + tileSize / 2)
         end
-    end
+    end]]
 end
 
 function StateLevel:click(wix, wiy)
@@ -301,6 +320,7 @@ end
 
 function StateLevel:onLoad(map)
     self.mouseProp = nil
+    self.turnsText = nil
 
     bgLayer = newLayer(self)
     highlightsLayer = newLayer(self)
@@ -323,7 +343,9 @@ function StateLevel:onLoad(map)
     end
     self:initBoard(map)
     self:setupGrid()
-    self:setupHUD()
+    self:refreshGrid()
+    self:refreshHUD()
+    self:refreshHighlights()
 end
 
 return StateLevel

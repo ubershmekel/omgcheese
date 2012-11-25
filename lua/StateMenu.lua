@@ -22,7 +22,7 @@ local function mouseOver(sx, sy)
 end
 
 local function click(sx, sy)
-    print('click', sx, sy)
+    --print('click', sx, sy)
     local x, y = bgLayer:wndToWorld(sx, sy)
     local obj = partition:propForPoint(x, y)
     if obj == nil then

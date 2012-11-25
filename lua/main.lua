@@ -47,8 +47,8 @@ if MOAIApp ~= nil then
 end
 
 
---statemgr.push ( "StateMenu.lua" )
-statemgr.push ( "StateLevel.lua" )
+statemgr.push ( "StateMenu.lua" )
+--statemgr.push ( "StateLevel.lua" )
 --statemgr.push ( "StateSelectLevel.lua" )
 statemgr.begin()
 
