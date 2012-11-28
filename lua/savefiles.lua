@@ -36,17 +36,8 @@ function makeSaveFile ( filename )
 
 		local fullFileName = self.filename .. ".lua"
 		local workingDir
-        print('moai env dir', MOAIEnvironment.documentDirectory)
 		workingDir = MOAIFileSystem.getWorkingDirectory ()
 		MOAIFileSystem.setWorkingDirectory ( MOAIEnvironment.documentDirectory )
-
-        --fullFileName = '/data/data/com.getmoai.samples/files/gameSave.lua'
-        local fhand = io.open(fullFileName)
-        if fhand ~= nil then
-            print('readdata:',fhand:read("*all"), '-------------------')
-        else
-            print('nil file!!!!!!!!11')
-        end
 
 		if MOAIFileSystem.checkFileExists ( fullFileName ) then
             print('loading existing savefile')
@@ -74,8 +65,6 @@ function makeSaveFile ( filename )
 		self.fileexist = true
 		serializer:serialize ( self.data )
 		local gamestateStr = serializer:exportToString ()
-		print(MOAIEnvironment.documentDirectory, '.....', MOAIFileSystem.getWorkingDirectory () )
-        print('saving:',gamestateStr)
 		
 		workingDir = MOAIFileSystem.getWorkingDirectory () 
 		MOAIFileSystem.setWorkingDirectory ( MOAIEnvironment.documentDirectory )
@@ -83,7 +72,6 @@ function makeSaveFile ( filename )
 		local file = io.open ( fullFileName, 'wb' )
 		file:write ( gamestateStr )
 		file:close ()
-        print('fildata', io.open(fullFileName):read("*all") ,'-------------------')
 		MOAIFileSystem.setWorkingDirectory ( workingDir )
 	end
 
