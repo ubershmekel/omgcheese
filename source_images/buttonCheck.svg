@@ -18,8 +18,8 @@
    onload="init()"
    aria-pressed="false"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="button.svg"
-   inkscape:export-filename="/home/yuv/Dropbox/dev/github/omgcheese/images/buttonEmpty.png"
+   sodipodi:docname="buttonCheck.svg"
+   inkscape:export-filename="/home/yuv/Dropbox/dev/github/omgcheese/source_images/buttonCheck.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <metadata
@@ -48,7 +48,7 @@
      id="namedview26"
      showgrid="false"
      inkscape:zoom="2.4333333"
-     inkscape:cx="124.50596"
+     inkscape:cx="48.889521"
      inkscape:cy="37.698927"
      inkscape:window-x="65"
      inkscape:window-y="24"
@@ -78,11 +78,13 @@
 
 
 
+
         var color = window.frameElement.style.color;
 	var ButtonBase  = document.getElementById(&quot;ButtonBase&quot;);
         ButtonBase.style.fill=color;
 
 	<!-- Get text from params -->
+
 
 
 
@@ -103,6 +105,7 @@
 	TextShadow.firstChild.nodeValue = textOff;
 
 	<!-- Set initial HTML text -->
+
 
 
 
@@ -222,7 +225,7 @@
        x="1.5616455"
        y="-26.575342"
        id="ButtonBase"
-       style="fill:#ffff00;fill-opacity:1;stroke:none" />
+       style="fill:#ffd000;fill-opacity:1;stroke:none" />
     <rect
        width="252.87671"
        height="126.0274"

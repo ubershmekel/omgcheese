@@ -7,8 +7,8 @@ os.chdir(os.path.dirname(__file__) or '.')
 tilesDict = {
         ('tiles.png', 256, 256):
             [
-            ['gopher.png', 'cake.png', 'banana.png', 'kiwi.png'],
-            ['orange.png', 'grape.png', None, None],
+            [None, 'gopher.png', 'cake.png', 'banana.png'],
+            ['kiwi.png', 'orange.png', 'grape.png', 'apple.png'],
             [None, None, None, None],
             [None, None, None, None],
             ],

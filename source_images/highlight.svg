@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="256"
+   height="256"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="highlight.svg"
+   inkscape:export-filename="/home/yuv/Dropbox/dev/github/omgcheese/images/highlight.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3782">
+      <stop
+         id="stop3784"
+         offset="0"
+         style="stop-color:#ffffff;stop-opacity:0.2846154;" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0.82191783"
+         id="stop3790" />
+      <stop
+         id="stop3786"
+         offset="1"
+         style="stop-color:#000000;stop-opacity:0;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3774">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3776" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3778" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3782"
+       id="radialGradient3788"
+       cx="114.14724"
+       cy="102.20428"
+       fx="114.14724"
+       fy="102.20428"
+       r="107.07109"
+       gradientTransform="matrix(1,0,0,0.86084246,0,14.222496)"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="pad" />
+    <filter
+       inkscape:collect="always"
+       id="filter3796"
+       x="-0.10401466"
+       width="1.2080293"
+       y="-0.12092062"
+       height="1.2418412">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="9.2374632"
+         id="feGaussianBlur3798" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#000000"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.3984375"
+     inkscape:cx="63.83879"
+     inkscape:cy="91.546112"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1301"
+     inkscape:window-height="744"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-796.36218)">
+    <image
+       y="1061.8921"
+       x="-63.803665"
+       id="image3827"
+       xlink:href="file:///home/yuv/Dropbox/dev/github/omgcheese/source_images/kiwi.png"
+       height="256"
+       width="256" />
+    <path
+       sodipodi:type="arc"
+       style="opacity:0.5;fill:url(#radialGradient3788);fill-opacity:1;stroke:none;filter:url(#filter3796)"
+       id="path3004"
+       sodipodi:cx="114.14724"
+       sodipodi:cy="102.20428"
+       sodipodi:rx="106.57109"
+       sodipodi:ry="91.671341"
+       d="m 220.71833,102.20428 a 106.57109,91.671341 0 1 1 -213.142181,0 106.57109,91.671341 0 1 1 213.142181,0 z"
+       transform="matrix(0.93210398,0,0,1.0540994,21.602904,816.62872)" />
+  </g>
+</svg>

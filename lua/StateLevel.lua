@@ -28,16 +28,17 @@ local function getGfx(fname, layer)
 end
 
 local tilemap = {}
-tilemap[MOUSE] = 1
-tilemap[CHEESE] = 2
-tilemap[BANANA] = 3
-tilemap[KIWI] = 4
-tilemap[ORANGE] = 5
-tilemap[GRAPE] = 6
-tilemap[EMPTY] = 7
+tilemap[EMPTY] = 1
+tilemap[MOUSE] = 2
+tilemap[CHEESE] = 3
+tilemap[BANANA] = 4
+tilemap[KIWI] = 5
+tilemap[ORANGE] = 6
+tilemap[GRAPE] = 7
+tilemap[APPLE] = 8
 
-highlightTile = 8
-targetTile = 9
+--highlightTile = 8
+--targetTile = 9
 
 --local highlightGfx = getGfx('highlight.png')
 --local targetGfx = getGfx('target.png')
@@ -58,11 +59,11 @@ layer:insertProp ( prop )
 prop:moveRot ( 360, 1.5 )]]
 
 function StateLevel:initBoard()
-    if self.map == nil then
+    if self.map.data == nil then
         board = Board:new(COLS, ROWS)
         board:fill_random()
-        board[1][1] = MOUSE
-        board[COLS][ROWS] = CHEESE
+        board[1][ROWS] = MOUSE
+        board[COLS][1] = CHEESE
     else
         board = Board:load(self.map.data):copy()
     end
@@ -152,11 +153,11 @@ function StateLevel:animateEat(x, y)
         --drawBoard()
         --refreshGrid()
 
-        self:refreshHighlights()
         self:refreshHUD()
-        if not board:has_cheese() then
-            self:endGame()
+        if board:has_cheese() then
+            self:refreshHighlights()
         else
+            self:endGame()
             --wait(self.mouseProp:seekLoc ( wox, woy, stepTime))
         end
     end
@@ -258,6 +259,9 @@ function StateLevel:setupGrid()
     gridProp:setDeck(deck)
     gridProp:setGrid(grid)
     gridProp:setLoc(padding, padding)
+    -- so that grid positioning (like highlights and mouse location)
+    -- know the grid has been moved by 'padding' in this frame too.
+    gridProp:forceUpdate()
 
     tilesLayer:insertProp(gridProp)
 
@@ -322,11 +326,12 @@ function StateLevel:onLoad(map)
     if map == nil then
         self.isArcade = true
         self.title = 'Arcade'
+        self.map = {isHex=True}
     else
         self.isArcade = false
         self.title = 'Level ' .. map.name
+        self.map = map
     end
-    self.map = map
     self:initBoard()
     self:setupGrid()
     self:refreshGrid()
