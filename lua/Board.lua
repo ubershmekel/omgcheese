@@ -22,10 +22,16 @@ Board.mt = { __index = Board }
 
 math.randomseed(os.time())
 
-function Board:new(width, height)
+function Board:new(width, height, isHex)
+    assert(width ~= nil)
+    assert(height ~= nil)
+    if isHex == nil then
+        isHex = false
+    end
     local object = {
         width = width,
-        height = height
+        height = height,
+        isHex = isHex
         }
     setmetatable(object, Board.mt)
     for i=1, width do
@@ -74,6 +80,7 @@ end
 
 function Board:copy()
     local board = Board:new(self.width, self.height)
+    board.isHex = self.isHex
     for i=1, self.width do
         for j=1, self.height do
             board[i][j] = self[i][j]
@@ -82,13 +89,50 @@ function Board:copy()
     return board
 end
 
-local function save_boards(fname, boards)
+local function save_boards(fname, group, isHex, boards)
+    --[=[ Example record:
+
+        lev = {}
+        lev.name = '4'
+        lev.group = 'normal'
+        lev.data = [[
+         Mkogbgbokgbk
+         ookbggbobggg
+         ogkkgggggokk
+         bobokkbbkgbk
+         ogobgoggkkko
+         ogbgbogobkoC
+         ]]
+        table.insert(Levels, lev)
+
+    ]=]
+    local header = [[
+Levels = {}
+
+local lev = nil
+
+]]
+    local fmt = [=[
+lev = {}
+lev.name = '%s'
+lev.group = '%s'
+lev.isHex = %s
+lev.minTurns = %s
+lev.data = [[
+ %s
+ ]]
+table.insert(Levels, lev)
+
+]=]
+
+
     local file = io.open(fname, "w")
+    file:write(header)
     for i, sp in ipairs(boards) do
-        io.stdout:write(sp[1] .. ' ')
-        local b = sp[2] -- {score, board}
-        file:write(tostring(b))
-        file:write('\n')
+        local minTurns, board = sp[1], sp[2]
+        boardStr = string.sub(tostring(board), #'Board(\n   ', -4) -- remove "Board(" and ")"
+        file:write(string.format(fmt, '' .. i, group, isHex, minTurns, boardStr))
+        --file:write('\n')
     end
     file:close()
 end
@@ -138,7 +182,55 @@ function Board:standard_random()
     self[self.width][self.height] = CHEESE
 end
 
+function Board:hexAdjacent(x, y)
+    assert(x ~= nil)
+    assert(y ~= nil)
+    local adj = {}
+    if x < self.width then
+        adj[{x=x + 1, y=y}] = self[x + 1][y]
+    end
+    if 1 < x then
+        adj[{x=x - 1, y=y}] = self[x - 1][y]
+    end
+    --[[
+    hexmap:
+    1,3  2,3  3,3  4,3
+       1,2  2,2  3,2  4,2
+    1,1  2,1  3,1  4,1
+    
+    ]]
+    local offset = 1 - (y % 2) * 2 -- either -1 or +1
+    -- check if border
+    if offset == 1 and x + 1 >= self.width then
+        offset = nil
+    elseif offset == -1 and x <= 1 then
+        offset = nil
+    end
+        
+    if y < self.height then
+        adj[{x=x, y=y + 1}] = self[x][y + 1]
+        if offset ~= nil then
+            adj[{x=x + offset, y=y + 1}] = self[x + offset][y + 1]
+        end
+    end
+    if 1 < y then
+        adj[{x=x, y=y - 1}] = self[x][y - 1]
+        if offset ~= nil then
+            adj[{x=x + offset, y=y - 1}] = self[x + offset][y - 1]
+        end
+    end
+    return adj
+end
+
 function Board:adjacent(x, y)
+    if self.isHex then
+        return self:hexAdjacent(x, y)
+    else
+        return self:rectAdjacent(x, y)
+    end
+end
+
+function Board:rectAdjacent(x, y)
     assert(x ~= nil)
     assert(y ~= nil)
     local adj = {}
@@ -197,17 +289,9 @@ function Board:_eat_locs_recurse(x, y, what, found)
         return
     end
 
-    if x < self.width then
-        self:_eat_locs_recurse(x + 1, y, what, found)
-    end
-    if y < self.height then
-        self:_eat_locs_recurse(x, y + 1, what, found)
-    end
-    if 1 < x then
-        self:_eat_locs_recurse(x - 1, y, what, found)
-    end
-    if 1 < y then
-        self:_eat_locs_recurse(x, y - 1, what, found)
+    local adj = self:adjacent(x, y)
+    for pos, val in pairs(adj) do
+        self:_eat_locs_recurse(pos.x, pos.y, what, found)
     end
 end
 
@@ -231,7 +315,7 @@ function Board:eat(x, y)
     self[mx][my] = EMPTY
     self[x][y] = MOUSE
 end
-
+--[[
 function Board:eat2(x, y)
     assert(self:is_legal(x, y))
     what = self[x][y]
@@ -267,7 +351,7 @@ function Board:eat_recurse(x, y, what)
     if 1 < y then
         self:eat_recurse(x, y - 1, what)
     end
-end
+end]]
 
 function Board:has_cheese()
     for i=1, self.width do
@@ -297,23 +381,23 @@ function Board:solve()
     --local mouse_loc = self:find_tile(MOUSE)
     steps = {}
     
-    for i=1, self.width do
+    --[[for i=1, self.width do
         steps[i] = {}
         for j=1, self.height do
             steps[i][j] = -1
         end
-    end
+    end]]
 
     --steps[cheese_loc.x][cheese_loc.y] = 0
     i = 0
     while self:has_cheese() do
         --print(self)
         local current_eat_locs = {}
-        for i, pos in ipairs(self:legal_moves(self:find_tile(MOUSE))) do
+        for i, pos in ipairs(self:legal_moves()) do
             local eat_locs = self:eat_locs(pos.x, pos.y)
             for _, loc in pairs(eat_locs) do
                 table.insert(current_eat_locs, loc)
-                steps[loc.x][loc.y] = i
+                --steps[loc.x][loc.y] = i
             end
             -- manually, simaltaneously remove tiles to avoid convoluting eat steps
         end
@@ -360,12 +444,14 @@ function console_play()
     print(string.format('Game over in %d turns', turns))
 end]]
 
-function generate_levels()
+function generate_levels(width, height, fname, group, isHex)
     local results = {}
     local boards = {}
-    local board = Board:new(12, 6)
+    local board = Board:new(width, height)
+    print('generating')
     for i=1, 100 do
         board:standard_random()
+        board.isHex = isHex
         local copy = board:copy()
         local steps = board:solve()
         table.insert(results, steps)
@@ -374,11 +460,12 @@ function generate_levels()
     function compare(a,b)
         return a[1] < b[1]
     end
+    print 'sorting'
     table.sort(boards, compare)
 
     require('stats')
-    save_boards('normal.txt', boards)
     stats.print(results)
+    save_boards(fname, group, isHex, boards)
 
 end
 

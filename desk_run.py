@@ -17,6 +17,7 @@ SUFFIX = ' config.lua main.lua'
 
 system = platform.system()
 if system == "Windows":
+    SDK = os.path.expandvars(r'%userprofile%/Downloads/moai-sdk')
     run = SDK + WINRUN
 elif system == "Linux":
     run = SDK + LINUXRUN

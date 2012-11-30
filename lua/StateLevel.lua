@@ -57,40 +57,6 @@ prop:setLoc(1.7, 1.7)
 layer:insertProp ( prop )
 prop:moveRot ( 360, 1.5 )]]
 
-function drawBoard()
-    tiles = {}
-    tilesLayer:clear()
-    highlightsLayer:clear()
-    targetsLayer:clear()
-    --setBackground()
-    for x=1, COLS do
-        col = {}
-        table.insert(tiles, col)
-        for y=1, ROWS do
-            --local tileProp = MOAIProp2D.new ()
-            local what = board[x][y]
-            --tileProp:setDeck ( gfx[what] )
-            --tileProp:setLoc(x, y)
-            --tilesLayer:insertProp (tileProp)
-            --tiles[x][y] = tileProp
-            local tileProp, quad = getGfx(resources[what], tilesLayer)
-            tiles[x][y] = tileProp
-            tileProp:setLoc(x, y)
-
-            if what == MOUSE then
-                mouseProp = tileProp
-            end
-            if board:is_legal(x, y) then
-                --local highlightProp = MOAIProp2D.new ()
-                --highlightProp:setDeck(highlightGfx)
-                local highlightProp = getGfx('highlight.png', highlightsLayer)
-                highlightProp:setLoc(x, y)
-                --highlightsLayer:insertProp(highlightProp)
-            end
-        end
-    end
-end
-
 function StateLevel:initBoard()
     if self.map == nil then
         board = Board:new(COLS, ROWS)
@@ -100,6 +66,7 @@ function StateLevel:initBoard()
     else
         board = Board:load(self.map.data):copy()
     end
+    board.isHex = true
     self.turns = 0
     self.minTurns = board:copy():solve()
     --drawBoard()
@@ -126,11 +93,11 @@ local function highlightTargets(x, y)
 end
 
 function StateLevel:gridToWorld(grx, gry)
-    --[[local tx, ty = grid:getTileLoc(grx, gry)
+    local tx, ty = grid:getTileLoc(grx, gry)
     local wox, woy = gridProp:modelToWorld(tx, ty)
-    print(grx, gry, tx, ty, wox, woy)
-    return wox, woy]]
-    return padding + (grx - 0.5) * self.tileWidth, padding + (gry - 0.5) * self.tileHeight
+    --print(grx, gry, tx, ty, wox, woy)
+    return wox, woy
+    --return padding + (grx - 0.5) * self.tileWidth, padding + (gry - 0.5) * self.tileHeight
 end
 
 function StateLevel:endGame()
@@ -159,7 +126,7 @@ function StateLevel:refreshHighlights()
     for i=1, board.width do
         for j=1, board.height do
             if board:is_legal(i, j) then
-                local highlightProp = staticImage('highlight.png', highlightsLayer, -self.tileWidth/2, -self.tileHeight/2, self.tileWidth/2, self.tileHeight/2)
+                local highlightProp = staticImage('highlight.png', highlightsLayer, -self.tileWidth, -self.tileHeight, self.tileWidth, self.tileHeight)
                 highlightProp:setLoc(self:gridToWorld(i, j))
             end
         end
@@ -263,18 +230,28 @@ function StateLevel:setupGrid()
     local deck = MOAITileDeck2D.new()
     self.tileDeck = deck
 
-    self.tileHeight = (Env.wy - padding - barHeight) / board.height
-    self.tileWidth = (Env.wx - 2 * padding) / board.width
-    grid:initRectGrid(board.width, board.height, self.tileWidth, self.tileHeight)
+    local px, py = Env.wx - 2 * padding, Env.wy - padding - barHeight
+    self.tileWidth = px / board.width
+    self.tileHeight =  py / board.height
+    
     deck:setTexture("tiles.png")
-    deck:setSize(tilesNX, tilesNY)
+    if board.isHex then
+        --self.tileWidth = pxx / (board.width * 2 / 3.0 + 1)
+        --self.tileHeight = pxy / ((board.height / 2.0) + 1)
+        self.tileWidth = px / (board.width + 0.5)
+        grid:initRectGrid(board.width, board.height, self.tileWidth, self.tileHeight)
+        grid:setShape(MOAIGridSpace.HEX_SHAPE)
+        deck:setSize(tilesNX, tilesNY)
+        --grid:initHexGrid ( board.width, board.height, 20, 0, 0 ) --blah! Can't set height vs width!
+        --[[deck:setTexture ( "hex-tiles.png" )
+        deck:setSize ( 4, 4, 0.25, 0.216796875 )]]
+    else
+        grid:initRectGrid(board.width, board.height, self.tileWidth, self.tileHeight)
+        deck:setSize(tilesNX, tilesNY)
 
-    --deck:setRect(0, 0, tileWidth, tileHeight)
-    --deck:setRect(-0.5, -0.5, 0.5,0.5)
-
-    --[[grid:initHexGrid ( wx, wy, tileSize )
-    deck:setTexture ( "hex-tiles.png" )
-    deck:setSize ( 4, 4, 0.25, 0.216796875 )]]
+        --deck:setRect(0, 0, tileWidth, tileHeight)
+        --deck:setRect(-0.5, -0.5, 0.5,0.5)
+    end
     
 
     gridProp = MOAIProp2D.new()
@@ -335,9 +312,9 @@ function StateLevel:onLoad(map)
     self.turnsText = nil
 
     bgLayer = newLayer(self)
-    highlightsLayer = newLayer(self)
     targetsLayer = newLayer(self)
     tilesLayer = newLayer(self)
+    highlightsLayer = newLayer(self)
     fgLayer = newLayer(self)
     
     staticImage('bg.jpg', bgLayer, 0, 0, Env.wx, Env.wy)

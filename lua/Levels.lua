@@ -1,22 +1,3 @@
---[=[
-How I made this from the old generated file
-
-output = '''
-Levels = {}
-
-'''
-template = '''
-lev = {{}}
-lev.name = '{name}'
-lev.group = '{group}'
-lev.data = [[\n{data}\n ]]
-table.insert(Levels, lev)
-'''
-for i, data in enumerate(d.split('Board')[1:]):
-    data = data.strip('\n()')
-    res = template.format(name='%d' % (i+1), group='normal', data=data)
-    output += res
-]=]
 
 Levels = {}
 
