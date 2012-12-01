@@ -82,7 +82,7 @@ local function highlightTargets(x, y)
         return
     end
     targetsLayer:clear()
-    for _, pos in pairs(board:eat_locs(x, y)) do
+    for _, pos in ipairs(board:eat_locs(x, y)) do
         --local targetProp = MOAIProp2D.new ()
         --targetProp:setDeck(targetGfx)
         local targetProp = getGfx('target.png', targetsLayer)
@@ -143,22 +143,28 @@ function StateLevel:animateEat(x, y)
     local stepTime = 0.08
     
     local function threadAnim()
-        for _, pos in pairs(board:eat_locs(x, y)) do
+        local endGame = false
+        for _, pos in ipairs(board:eat_locs(x, y)) do
+            local what = board[pos.x][pos.y]
             local wox, woy = self:gridToWorld(pos.x, pos.y)
             wait ( self.mouseProp:seekLoc ( wox, woy, stepTime, MOAIEaseType.LINEAR))
             self:setTile(pos.x, pos.y, EMPTY)
+            if what == CHEESE then
+                endGame = true
+                break
+            end
         end
-        local wox, woy = self:gridToWorld(x, y)
-        board:eat(x, y)
         --drawBoard()
         --refreshGrid()
+        --local wox, woy = self:gridToWorld(x, y)
+        --wait(self.mouseProp:seekLoc ( wox, woy, stepTime))
 
         self:refreshHUD()
-        if board:has_cheese() then
-            self:refreshHighlights()
-        else
+        if endGame then
             self:endGame()
-            --wait(self.mouseProp:seekLoc ( wox, woy, stepTime))
+        else
+            board:eat(x, y)
+            self:refreshHighlights()
         end
     end
     local thread = MOAIThread.new ()

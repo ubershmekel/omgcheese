@@ -86,6 +86,7 @@ Set.mt = { __index = Set }
 
 function Set:new()
     local object = {}
+    object.hashes = {}
     setmetatable(object, Set.mt)
     return object
 end
@@ -93,14 +94,22 @@ end
 function Set:add(item)
     -- hash as key
     assert(item ~= nil)
-    local hash = table.tostring(item)
-    self[hash] = item
+    local hash
+    if type(item) == 'table' then
+        hash = table.tostring(item)
+    else
+        hash = tostring(item)
+    end
+    if self.hashes[hash] == nil then
+        self.hashes[hash] = item
+        table.insert(self, item)
+    end
 end
 
 function Set:contains(item)
     assert(item ~= nil)
     local hash = table.tostring(item)
-    if self[hash] == nil then
+    if self.hashes[hash] == nil then
         return false
     else
         return true
@@ -109,7 +118,7 @@ end
 
 function Set.mt:__tostring()
     local result = {}
-    for hash, val in pairs(self) do
+    for i, val in ipairs(self) do
         table.insert(result, table.tostring(val))
     end
     return "{" .. table.concat(result, ",") .. "}"
@@ -131,6 +140,10 @@ function test()
     -- check if a new point is equally hashed to the first one
     assert(s:contains({x=1, y=2}))
     print(s)
+
+    for _, v in ipairs(s) do
+        print(table.tostring(v))
+    end
 end
 
 

@@ -309,7 +309,7 @@ function Board:eat_locs(x, y)
 end
 
 function Board:eat(x, y)
-    for _, loc in pairs(self:eat_locs(x, y)) do
+    for _, loc in ipairs(self:eat_locs(x, y)) do
         self[loc.x][loc.y] = EMPTY
     end
     local mx, my = self:find_tile(MOUSE)
@@ -396,13 +396,13 @@ function Board:solve()
         local current_eat_locs = {}
         for i, pos in ipairs(self:legal_moves()) do
             local eat_locs = self:eat_locs(pos.x, pos.y)
-            for _, loc in pairs(eat_locs) do
+            for _, loc in ipairs(eat_locs) do
                 table.insert(current_eat_locs, loc)
                 --steps[loc.x][loc.y] = i
             end
             -- manually, simaltaneously remove tiles to avoid convoluting eat steps
         end
-        for _, loc in pairs(current_eat_locs) do
+        for _, loc in ipairs(current_eat_locs) do
             self[loc.x][loc.y] = EMPTY
         end
 
