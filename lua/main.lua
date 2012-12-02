@@ -7,6 +7,8 @@ require 'particle'
 require 'Levels'
 require 'savefiles'
 require 'Config'
+require 'DragClick'
+
 
 function onBackButtonPressed ()
 	print ( "onBackButtonPressed: " )
