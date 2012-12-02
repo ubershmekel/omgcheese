@@ -1,4 +1,5 @@
 host-android/build
 host-android/host-source/project/libs
 host-chrome/build
+lua/Config.lua
 *~

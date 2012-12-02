@@ -101,7 +101,7 @@ end
 function DragClick:up(wix, wiy)
     local lastTouch = self.lastTouch
     self.lastTouch = nil
-    if lastTouch.distance > Env.Screen.width / 15.0 then
+    if lastTouch == nil or lastTouch.distance > Env.Screen.width / 15.0 then
         return
     end
     print('click')
@@ -179,6 +179,21 @@ function setupViewport(gridx, gridy, name)
     viewport:setOffset(-1, -1) -- origin at bottom left
 
     return viewport
+end
+
+function R:event(name, data)
+    if MOAIEnvironment.osBrand == "Linux" then
+        print('Disabled event on Linux', name)
+        return
+    end
+
+    if not self.trackingStarted then
+        require 'moai/apsalar'
+        apsalar.start (Config.apsalarApi, Config.apsalarSecret)
+        self.trackingStarted = true
+    end
+    apsalar.event(name, data)
+    print('Event', name, table.tostring(data or {}))
 end
 
 function newLayer(state)

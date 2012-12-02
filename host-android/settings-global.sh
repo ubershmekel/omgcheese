@@ -34,9 +34,9 @@
 # list of icon files
 #----------------------------------------------------------------#
 
-	icon_ldpi="res/icon-ldpi.png"
-	icon_mdpi="res/icon-mdpi.png"
-	icon_hdpi="res/icon-hdpi.png"
+	#icon_ldpi="res/icon-ldpi.png"
+	#icon_mdpi="res/icon-mdpi.png"
+	#icon_hdpi="res/icon-hdpi.png"
 	icon_xhdpi="res/icon-xhdpi.png"
 		
 #----------------------------------------------------------------#

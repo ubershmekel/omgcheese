@@ -6,6 +6,7 @@ require 'Board'
 require 'particle'
 require 'Levels'
 require 'savefiles'
+require 'Config'
 
 function onBackButtonPressed ()
 	print ( "onBackButtonPressed: " )
@@ -43,6 +44,8 @@ viewport:setSize ( screenWidth, screenHeight )
 
 viewport:setScale ( Env.wx, Env.wy )
 viewport:setOffset(-1, -1) -- origin at bottom left	
+
+R:event("RunMain")
 
 Env.progress = function(map, setValue)
     assert(map ~= nil)

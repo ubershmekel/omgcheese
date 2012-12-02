@@ -102,6 +102,7 @@ function StateLevel:gridToWorld(grx, gry)
 end
 
 function StateLevel:endGame()
+    local analData = {map=self.map.name, group=self.map.group, turns=self.turns, minTurns=self.minTurns}
     self.mouseProp:seekLoc(Env.wx / 2, Env.wy / 2, 3)
     self.mouseProp:moveRot(360, 2)
     wait(self.mouseProp:seekScl(3 * self.tileWidth, 3 * self.tileHeight, 3))
@@ -120,6 +121,7 @@ function StateLevel:endGame()
         Env.progress(self.map, prog)
         statemgr.pop()
     end
+    R:event('StateLevel:endGame', analData)
 end
 
 function StateLevel:refreshHighlights()
@@ -332,7 +334,7 @@ function StateLevel:onLoad(map)
     if map == nil then
         self.isArcade = true
         self.title = 'Arcade'
-        self.map = {isHex=True}
+        self.map = {name='Arcade', isHex=True, group=''}
     else
         self.isArcade = false
         self.title = 'Level ' .. map.name
@@ -343,6 +345,8 @@ function StateLevel:onLoad(map)
     self:refreshGrid()
     self:refreshHUD()
     self:refreshHighlights()
+
+    R:event('StateLevel:onLoad', {map=self.map.name, group=self.map.group})
 end
 
 return StateLevel
