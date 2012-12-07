@@ -36,24 +36,24 @@ end
 
 
 --DragClick.click = StateSelectLevel.click
-DragClick.drag = function(dx, dy)
+local function drag(dx, dy)
     StateSelectLevel.camera:moveLoc(-dx, -dy)
 end
-DragClick.click = function(wix, wiy)
+local function click(wix, wiy)
     StateSelectLevel:click(wix, wiy)
 end
-
+local dragclick = DragClick:new(drag, click)
 
 function StateSelectLevel:mouseDown(wix, wiy)
-    DragClick.down(wix, wiy)
+    dragclick.down(wix, wiy)
 end
 
 StateSelectLevel.onInput = function ( self )
 	if inputmgr:up () then
 		--self:click ( inputmgr:getTouch ())
-        DragClick:up( inputmgr:getTouch () )
+        dragclick:up( inputmgr:getTouch () )
 	elseif inputmgr:isDown () then
-        DragClick:down( inputmgr:getTouch () )
+        dragclick:down( inputmgr:getTouch () )
 		--self:mouseDown( inputmgr:getTouch ())
 	end
 end
