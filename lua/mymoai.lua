@@ -157,11 +157,11 @@ function R:event(name, data)
     end
 
     if not self.trackingStarted then
-        require 'moai/apsalar'
-        apsalar.start (Config.apsalarApi, Config.apsalarSecret)
+        require 'moai/countly'
+        countly.start ('http://192.168.0.143/i?', '0893398f6c2344f8302c719a65e8903b5d3d2dc8')
         self.trackingStarted = true
     end
-    apsalar.event(name, data)
+    countly.event(name, data)
     print('Event', name, table.tostring(data or {}))
 end
 
@@ -190,5 +190,36 @@ function clearLayers()
     for i, layer in ipairs(layers) do
         layer:clear()
     end
+end
+
+function R:dumpEnv()
+    -- see http://moaisnippets.com/dump-moai-environment-details
+    print ("               Display Name : ", MOAIEnvironment.appDisplayName)
+    print ("                     App ID : ", MOAIEnvironment.appID)
+    print ("                App Version :  ", MOAIEnvironment.appVersion)
+    print ("            Cache Directory : ", MOAIEnvironment.cacheDirectory)
+    print ("   Carrier ISO Country Code : ", MOAIEnvironment.carrierISOCountryCode)
+    print ("Carrier Mobile Country Code : ", MOAIEnvironment.carrierMobileCountryCode)
+    print ("Carrier Mobile Network Code : ", MOAIEnvironment.carrierMobileNetworkCode)
+    print ("               Carrier Name : ", MOAIEnvironment.carrierName)
+    print ("            Connection Type : ", MOAIEnvironment.connectionType)
+    print ("               Country Code : ", MOAIEnvironment.countryCode)
+    print ("                    CPU ABI : ", MOAIEnvironment.cpuabi)
+    print ("               Device Brand : ", MOAIEnvironment.devBrand)
+    print ("                Device Name : ", MOAIEnvironment.devName)
+    print ("        Device Manufacturer : ", MOAIEnvironment.devManufacturer)
+    print ("                Device Mode : ", MOAIEnvironment.devModel)
+    print ("            Device Platform : ", MOAIEnvironment.devPlatform)
+    print ("             Device Product : ", MOAIEnvironment.devProduct)
+    print ("         Document Directory : ", MOAIEnvironment.documentDirectory)
+    print ("         iOS Retina Display : ", MOAIEnvironment.iosRetinaDisplay)
+    print ("              Language Code : ", MOAIEnvironment.languageCode)
+    print ("                   OS Brand : ", MOAIEnvironment.osBrand)
+    print ("                 OS Version : ", MOAIEnvironment.osVersion)
+    print ("         Resource Directory : ", MOAIEnvironment.resourceDirectory)
+    print ("                 Screen DPI : ", MOAIEnvironment.screenDpi)
+    print ("              Screen Height : ", MOAIEnvironment.verticalResolution)
+    print ("               Screen Width : ", MOAIEnvironment.horizontalResolution)
+    print ("                       UDID : ", MOAIEnvironment.udid)
 end
 
